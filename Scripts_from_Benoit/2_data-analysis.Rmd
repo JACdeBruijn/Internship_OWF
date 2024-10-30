@@ -1,0 +1,253 @@
+---
+title: "APELAFICO integral study"
+output:
+  html_document:
+    df_print: paged
+  word_document: default
+  pdf_document: default
+header-includes:
+- \usepackage{lscape}
+- \newcommand{\blandscape}{\begin{landscape}}
+- \newcommand{\elandscape}{\end{landscape}}
+---
+  
+```{r setup, include=FALSE}
+library(knitr)
+knitr::opts_chunk$set(comment = NA)
+
+rm(list=ls())
+
+library(ggplot2)
+library(tidyverse)
+library(lubridate)
+library(icesTAF)
+library(suncalc)
+library(pander)
+
+options(scipen = 999)
+
+setwd('Y:/APELAFICO/')
+
+sourceDir(file.path('.','function'))
+
+figurePath    <- file.path('.','figures')
+dataPath      <- file.path('.','data')
+resultPath    <- file.path('.','results')
+```
+
+**Section 1: data processing**
+*WBAT data*
+There is WBAT data at both 70khz CW and 200khz FM (asynchronous pinging). The data are annotated with labeling bottom and surface lines.
+
+For both frequencies, SA (~fish biomass) is exported using a threshold on sv (volume backscattering), meaning all above this treshold is considered fish. Here, the data are exported at thresholds ranging -60dB to -50dB in 1 dB steps.
+
+For the 200khz FM, a dedicated processing is in place to: 1) track the targets with a target detection algorithm, 2) extracts tracks and corresponding frequency spectrum. This is currently work in progress.
+
+**Table 1.1. overview of WBAT data.**
+```{r echo=FALSE, fig.align="center", fig.asp=0.6, message=FALSE, warning=FALSE}
+WBAT.tab <- read.csv('Z:/APELAFICO/LSSS/survey_db.csv')
+WBAT.tab <- WBAT.tab[,c(1:5,8,9)]
+WBAT.tab$dataSet_station <- paste0(WBAT.tab$dataSet,'_',WBAT.tab$station)
+
+pander::pandoc.table(WBAT.tab[,1:(dim(WBAT.tab)[2]-1)],
+                     style="simple", split.tables=200, justify="right", missing=".")
+
+```
+*CPOD data*
+CPOD data are available alongside all WBAT recordings expect HKZ and HKN data sets. All the data have been processed with click train classification (using CPOD.exe) and further bluzz click classification, using gaussian mixture models.
+
+**Table 1.2. overview of CPOD data.**
+```{r echo=FALSE, fig.align="center", fig.asp=0.6, message=FALSE, warning=FALSE}
+CPOD.tab <- read.csv('Z:/APELAFICO/CPOD_processing/data_mapping.csv')
+CPOD.tab$dataSet_station <- paste0(CPOD.tab$dataSet,'_',CPOD.tab$station)
+
+pander::pandoc.table(CPOD.tab,
+                     style="simple", split.tables=200, justify="right", missing=".")
+
+```
+
+**Section 2: results**
+
+
+**Figure 2.1. WBAT/CPOD time series.**
+```{r echo=FALSE, fig.align="center", fig.asp=0.6,out.width="80%", message=FALSE, warning=FALSE} 
+load(file.path(dataPath,'CPOD_all.RData'))
+
+CPOD.all$station[CPOD.all$station == "267878"] <- "267838"
+
+CPOD.all$dataSet_station <- paste0(CPOD.all$dataSet,'_',CPOD.all$station)
+
+WBAT.tab <- WBAT.tab[WBAT.tab$SA_exported == 1,]
+
+flagFirst.all <- T
+for(stationSet in unique(WBAT.tab$dataSet_station)){
+  tab.filt <- WBAT.tab[WBAT.tab$dataSet_station == stationSet,]
+  
+  # Read all data in the set of station+data set
+  flagFirst <- T
+  for(idxDataSet in tab.filt$surveName){
+    load(file.path(dataPath,paste0('WBAT_',idxDataSet,'.RData')))
+    WBAT.all <- subset(WBAT.all,depth == 0)
+    
+    if(flagFirst){
+      WBAT.join <- WBAT.all
+      flagFirst <- F
+    }else{
+      WBAT.join <- rbind(WBAT.join,WBAT.all)
+    }
+  }
+  
+  # summarize WBAT data per intervals
+  WBAT.summary <- WBAT.join %>% group_by(treshold,IDinter,frequency,chunk) %>% summarize(dataSet_station=stationSet,
+                                                                                          station=unique(station),
+                                                                                         dataSet=unique(dataSet),
+                                                                                          SA=mean(SA,na.rm=T),
+                                                                                         datetime=first(datetime),
+                                                                                         depthIntegration=first(depthIntegration))
+  
+  
+  
+  mySunlightTimes <- getSunlightTimes(date = as.Date(WBAT.summary$datetime),
+                                      lat = 51.65512058,
+                                      lon = 2.793530261, tz = "UTC") # hack, lat/lon needs to be inputed for each station
+  WBAT.summary$hourSunset    <- hour(mySunlightTimes$sunset)+minute(mySunlightTimes$sunset)/60+second(mySunlightTimes$sunset)/60/60
+  WBAT.summary$hourSunrise   <- hour(mySunlightTimes$sunrise)+minute(mySunlightTimes$sunrise)/60+second(mySunlightTimes$sunrise)/60/60
+  WBAT.summary$sunset <- mySunlightTimes$sunset
+  WBAT.summary$sunrise <- mySunlightTimes$sunrise
+  
+  WBAT.summary$dayNight <- 'night'
+  WBAT.summary$dayNight[(WBAT.summary$sunrise <= WBAT.summary$datetime) & (WBAT.summary$datetime <= WBAT.summary$sunset)] <- 'day'
+  
+  if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
+    CPOD.stationSet <- strsplit(stationSet,' ')[[1]][1]
+    # summarize CPOD
+    CPOD.current <- subset(CPOD.all,dataSet_station == CPOD.stationSet)
+    CPOD.current$stationName  <- CPOD.current$station
+    CPOD.current$lat <- NA
+    CPOD.current$lon <- NA
+    
+    mySunlightTimes <- getSunlightTimes(date = as.Date(CPOD.current$timeIci_str),
+                                        lat = 51.65512058,
+                                        lon = 2.793530261, tz = "UTC") # hack, lat/lon needs to be inputed for each station
+    CPOD.current$hourSunset    <- hour(mySunlightTimes$sunset)+minute(mySunlightTimes$sunset)/60+second(mySunlightTimes$sunset)/60/60
+    CPOD.current$hourSunrise   <- hour(mySunlightTimes$sunrise)+minute(mySunlightTimes$sunrise)/60+second(mySunlightTimes$sunrise)/60/60
+    CPOD.current$sunset <- mySunlightTimes$sunset
+    CPOD.current$sunrise <- mySunlightTimes$sunrise
+    
+    CPOD.current$dayNight <- 'night'
+    CPOD.current$dayNight[(CPOD.current$sunrise <= CPOD.current$timeIci_str) & (CPOD.current$timeIci_str <= CPOD.current$sunset)] <- 'day'
+    
+    res.CPOD <- format_CPOD(CPOD.current)
+  }
+
+  if(flagFirst.all){
+    if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
+      CPOD.all.summary <- res.CPOD$CPOD.day
+    }
+    WBAT.all.summary <- WBAT.summary
+    flagFirst.all <- F
+  }else{
+    if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
+      CPOD.all.summary <- rbind(CPOD.all.summary,res.CPOD$CPOD.day)
+    }
+    WBAT.all.summary <- rbind(WBAT.all.summary,WBAT.summary)
+  }
+
+  # make individual plot
+  print(ggplot(subset(WBAT.summary,treshold %in% c(-60,-55,-50)),aes(x=datetime,y=log10(SA),col=as.factor(treshold)))+
+          geom_line()+
+          geom_smooth(col='black')+
+          ggtitle(paste0('WBAT time series - ',stationSet))+
+          facet_grid(treshold~frequency))
+
+  if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
+    print(ggplot(res.CPOD$CPOD.day,aes(x=time_day,y=buzz_ratio))+
+              geom_line()+
+              geom_smooth(col='black')+
+              ggtitle(paste0('buzz click ratio - ',stationSet)))
+  }
+
+  print(ggplot(subset(WBAT.summary,treshold %in% c(-60,-55,-50)),aes(x=dayNight,y=log10(SA),fill=as.factor(treshold)))+
+        geom_violin(draw_quantiles = c(0.25, 0.5, 0.75))+
+        facet_grid(treshold~frequency)+
+        ggtitle(paste0('WBAT day/night - ',stationSet)))
+
+  if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
+    print(ggplot(subset(res.CPOD$CPOD.hour,buzz_pos_minutes!=0),aes(x=dayNight,y=buzz_pos_minutes))+
+          geom_boxplot()+
+            ggtitle(paste0('buzz pos min - ',stationSet)))
+  }
+}
+
+```
+
+**Figure 2.2. CPOD/WBAT results per station.**
+```{r echo=FALSE, fig.align="center", fig.asp=0.6,out.width="80%", message=FALSE, warning=FALSE} 
+print(ggplot(WBAT.all.summary,aes(x=station,y=log10(SA)))+
+  geom_violin(draw_quantiles = c(0.25, 0.5, 0.75))+
+  facet_grid(frequency~dataSet,scales = 'free_x')+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1))+
+  ggtitle('SA all stations'))
+
+print(ggplot(CPOD.all.summary,aes(x=stationName,y=pos_minutes))+
+  geom_boxplot()+
+  facet_wrap(~dataSet,scales = 'free')+
+  ggtitle('CPOD positive minutes per station')+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+
+print(ggplot(CPOD.all.summary,aes(x=stationName,y=buzz_ratio))+
+  geom_boxplot()+
+  facet_wrap(~dataSet,scales = 'free_x')+
+  ggtitle('CPOD buzz click ratio per station')+
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)))
+```
+
+**Figure 2.3. CPOD/WBAT correlation.**
+```{r echo=FALSE, fig.align="center", fig.asp=0.6,out.width="80%", message=FALSE, warning=FALSE} 
+
+WBAT.all.summary$time_day <- as.POSIXct(cut(WBAT.all.summary$datetime, breaks = "1 day"),tz='UTC')
+CPOD.all.summary$station <- CPOD.all.summary$stationName
+CPOD.all.summary$dataSet_station <- paste0(CPOD.all.summary$dataSet,'_',CPOD.all.summary$station)
+
+# combine data frames
+flagFirst <- T
+for(stationSet in unique(WBAT.all.summary$dataSet_station)){
+  idx.WBAT <- WBAT.all.summary$dataSet_station == stationSet
+  
+  if(!(unique(WBAT.all.summary$dataSet[idx.WBAT]) %in% c('2022-HKZ','2023-HKN'))){
+    CPOD.stationSet <- strsplit(stationSet,' ')[[1]][1]
+    CPOD.current <- subset(CPOD.all.summary,dataSet_station == CPOD.stationSet)
+    
+    WBAT.all.day <- WBAT.all.summary[idx.WBAT,] %>% group_by(time_day,frequency,treshold) %>% summarize(SA=mean(SA,na.rm=T))
+    
+    df.join <- left_join(WBAT.all.day,CPOD.current,by=c('time_day'))
+    df.join$station <- unique(WBAT.all.summary$station[idx.WBAT])
+    df.join$dataSet <- unique(WBAT.all.summary$dataSet[idx.WBAT])
+    
+    if(flagFirst){
+      df.join.all <- df.join
+      flagFirst <- F
+    }else{
+      df.join.all <- rbind(df.join.all,df.join)
+    }
+  }
+}
+
+for(idxDataSet in unique(df.join.all$dataSet)){
+  if(dim(subset(df.join.all,dataSet == idxDataSet & all_buzz!=0 & frequency == 70 & treshold == -50))[1] != 0){
+    print(ggplot(subset(df.join.all,dataSet == idxDataSet & all_buzz!=0 & frequency == 70 & treshold == -50),aes(x=buzz_ratio,y=log10(SA)))+
+      geom_point()+
+      geom_smooth(method='lm')+
+      facet_wrap(~station)+
+      ggtitle(paste0('CPOD/WBAT(70) relation - ',idxDataSet)))
+  }
+  
+  if(dim(subset(df.join.all,dataSet == idxDataSet & all_buzz!=0 & frequency == 200 & treshold == -50))[1] != 0){
+    print(ggplot(subset(df.join.all,dataSet == idxDataSet & all_buzz!=0 & frequency == 200 & treshold == -50),aes(x=buzz_ratio,y=log10(SA)))+
+            geom_point()+
+            geom_smooth(method='lm')+
+            facet_wrap(~station)+
+            ggtitle(paste0('CPOD/WBAT(200) relation - ',idxDataSet)))
+  }
+}
+```
