@@ -10,11 +10,11 @@ rm(list=ls())
 setwd('G:/git/APELAFICO_OWF_study/')
 #setwd('G:/git/WBAT_APELAFICO')
 
-sourceDir(file.path('.','function'))
+sourceDir(file.path('.','Function'))
 
-figurePath    <- file.path('.','figures')
-dataPath      <- file.path('.','data')
-resultPath    <- file.path('.','results')
+figurePath    <- file.path('.','Figures')
+dataPath      <- file.path('.','Fata')
+resultPath    <- file.path('.','Results')
 
 WBAT.tab <- read.csv(file.path(dataPath,'survey_db.csv'))
 WBAT.tab <- WBAT.tab[,c(1:5,8,9)]

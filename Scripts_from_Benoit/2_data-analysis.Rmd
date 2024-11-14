@@ -17,22 +17,18 @@ knitr::opts_chunk$set(comment = NA)
 
 rm(list=ls())
 
-library(ggplot2)
-library(tidyverse)
-library(lubridate)
-library(icesTAF)
-library(suncalc)
-library(pander)
+if(!require(pacman)) install.packages("pacman")
+pacman::p_load(tidyverse, lubridate, icesTAF, suncalc, pander)
 
 options(scipen = 999)
 
-setwd('Y:/APELAFICO/')
+# setwd('Y:/APELAFICO/')
 
-sourceDir(file.path('.','function'))
+sourceDir <- (file.path('.','Function'))
 
-figurePath    <- file.path('.','figures')
-dataPath      <- file.path('.','data')
-resultPath    <- file.path('.','results')
+figurePath    <- file.path('.','Figures')
+dataPath      <- file.path('.','Data')
+resultPath    <- file.path('.','Results')
 ```
 
 **Section 1: data processing**
@@ -45,7 +41,8 @@ For the 200khz FM, a dedicated processing is in place to: 1) track the targets w
 
 **Table 1.1. overview of WBAT data.**
 ```{r echo=FALSE, fig.align="center", fig.asp=0.6, message=FALSE, warning=FALSE}
-WBAT.tab <- read.csv('Z:/APELAFICO/LSSS/survey_db.csv')
+# WBAT.tab <- load(file.path(dataPath, 'survey_db.csv'))
+WBAT.tab <- read_csv('C:/Users/joost/Documents/05_WUR/Year_3/Internship/Offshore_Windparks/OWF_Project_folder/Internship_OWF/Data/survey_db.csv')
 WBAT.tab <- WBAT.tab[,c(1:5,8,9)]
 WBAT.tab$dataSet_station <- paste0(WBAT.tab$dataSet,'_',WBAT.tab$station)
 
@@ -71,7 +68,8 @@ pander::pandoc.table(CPOD.tab,
 
 **Figure 2.1. WBAT/CPOD time series.**
 ```{r echo=FALSE, fig.align="center", fig.asp=0.6,out.width="80%", message=FALSE, warning=FALSE} 
-load(file.path(dataPath,'CPOD_all.RData'))
+CPOD.all <- load(file.path(dataPath,'CPOD_all.RData'))
+load("C:/Users/joost/Documents/05_WUR/Year_3/Internship/Offshore_Windparks/OWF_Project_folder/Internship_OWF/Data/CPOD_all.RData")
 
 CPOD.all$station[CPOD.all$station == "267878"] <- "267838"
 

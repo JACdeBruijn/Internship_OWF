@@ -10,16 +10,14 @@ pacman::p_load(tidyverse, lubridate, icesTAF, suncalc)
 rm(list=ls())
 
 #setwd('D:/PAM_RABO/finless_neonate_HK')
-setwd('G:/git/APELAFICO_OWF_study/')
+# setwd('G:/git/APELAFICO_OWF_study/')
 #setwd('G:/git/WBAT_APELAFICO')
-setwd('C:/Users/joost/Documents/05_WUR/Year_3/Internship/Offshore Windparks/OWF_Project_folder/')
 # data_overview_JB <- read_csv("Data/APELAFICO_data/Data_overview/data_overview.csv")
 
-
-sourceDir(file.path('.','function'))
+sourceDir(file.path('.','Function'))
 
 figurePath    <- file.path('.','Figures')
-dataPath      <- file.path('.','Data/APELAFICO_data')
+dataPath      <- file.path('.','Data')
 resultPath    <- file.path('.','Results')
 
 WBAT.tab <- read.csv(file.path(dataPath,'survey_db.csv'))                       # Creating WBAT.tab from survey_db.csv
@@ -45,6 +43,8 @@ if(processFlag){
   CPOD.all$timeIci_str <- as.POSIXct(CPOD.all$timeIci_str,tz='UTC')
   
   CPOD.all$dataSet_station <- paste0(CPOD.all$dataSet,'_',CPOD.all$station)
+  CPOD.all$timeIci_num <- as.numeric(CPOD.all$timeIci_str)
+  
   
   WBAT.tab <- WBAT.tab[WBAT.tab$SA_exported == 1,]
   

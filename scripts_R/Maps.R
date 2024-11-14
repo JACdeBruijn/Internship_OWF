@@ -22,9 +22,12 @@ locations_GIT_filtered <- locations_GIT %>%
   mutate(station = ifelse(row_number() %in% c(9, 10, 11, 12), substr(station, 8, nchar(station)), station)) %>% 
   mutate(ID = as.factor(paste0(dataSet, "_", station))) %>% 
   mutate(number = as.factor(row_number())) %>% 
-  rename(lat_GIT = lat, lon_GIT = lon)                                              # Rename coordinates 
+  rename(lat_GIT = lat, lon_GIT = lon) %>%                                              # Rename coordinates 
+  mutate(lat_GIT = as.numeric(lat_GIT)) %>% 
+  select(-...4)
 
 head(locations_GIT_filtered)
+str(locations_GIT_filtered)
 
 locations_ETN_filtered <- locations_ETN %>% 
   filter(stationName %in% c("bpns-AP_CW", "bpns-Grafton", "bpns-AP_BW", "bpns-Birkenfels",      # 2021 stations
@@ -160,8 +163,20 @@ st_crs(bounding_box_sf)
 sf_turbine.BE <- st_transform(sf_turbine.BE, crs = st_crs(bounding_box_sf))
 
 
+Wreck_data <- tibble(
+  wreckname = c("BSW1", "BSW2"),
+  NCN = c("2404", "189"),
+  diepte = c("25.9", "19.2"),
+  lat = c("51.83984", "51.70465"),
+  lon = c("3.23594", "3.24060"),
+  length = c("34", "67"), 
+  width = c("9", "14"),
+  highed = c("5", ""),
+  boeg_deg = c("216", "131")) %>% 
+  mutate(lat = as.numeric(lat),
+         lon = as.numeric(lon))
 
-
+str(Wreck_data)
 
 
 ### Working with the dates ####
