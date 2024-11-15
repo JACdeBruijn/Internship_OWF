@@ -39,16 +39,15 @@ overview.tab <- overview.tab %>%
 # This works to load all the data files 
 ############################################################################################
 
-
-for(i in unique(WBAT.tab$surveName)){                              # Loop that will do everything for each unique dataSet_station that does also occur in overview.tab
-  tab.filt <- WBAT.tab[WBAT.tab$surveName == i,]
-  
-  for(idxDataSet in tab.filt$surveName){                                          # Reading all the data on station and data set for pelegc fish data
-    load(file.path(dataPath, paste0('WBAT_',idxDataSet,'.RData')))
-    
-  }
-}
-
+# Have included this later in the script in a for loop
+# for(i in unique(WBAT.tab$surveName)){                              # Loop that will do everything for each unique dataSet_station that does also occur in overview.tab
+#   tab.filt <- WBAT.tab[WBAT.tab$surveName == i,]
+#   
+#   for(idxDataSet in tab.filt$surveName){                                          # Reading all the data on station and data set for pelegc fish data
+#     load(file.path(dataPath, paste0('WBAT_',idxDataSet,'.RData')))
+#     
+#   }
+# }
 
 ############################################################################################
 # Improving the plots based on input Jeroen
@@ -65,42 +64,42 @@ WBAT_2021_BE_P1_belwind_70khz_60freq <- WBAT_2021_BE_P1_belwind_70khz %>%
          interval_number = dense_rank(datetime))
 
 #######################
+# This is not the correct script for the data wranling is a older one
+#######################
+# data <- WBAT_2021_BE_P1_belwind_70khz_60freq %>% 
+#   filter(depth != 0) %>% 
+#   group_by(interval_number) %>% 
+#   mutate(quantile_25 = quantile(log10_SA, 0.25, na.rm = T),
+#          log10_SA = ifelse(log10_SA < quantile_25, -5.0, log10_SA)) %>%
+#   ungroup() %>% 
+#   
+#   summarise(SA_sum_filtered  = sum(SA, na.rm = T)) %>%
+#   right_join(WBAT_2021_BE_P1_belwind_70khz_60freq, by = "interval_number") %>%
+#   mutate(SA = ifelse(depth == 0.0, SA_sum_filtered , SA),
+#          log10_SA = ifelse(depth != 0 & log10_SA < quantile_25, -5.0, log10_SA)) %>% 
+#   select(-SA_sum_filtered, -quantile_25)
 
-data <- WBAT_2021_BE_P1_belwind_70khz_60freq %>% 
-  filter(depth != 0) %>% 
-  group_by(interval_number) %>% 
-  mutate(quantile_25 = quantile(log10_SA, 0.25, na.rm = T),
-         log10_SA = ifelse(log10_SA < quantile_25, -5.0, log10_SA)) %>%
-  ungroup() %>% 
-  
-  summarise(SA_sum_filtered  = sum(SA, na.rm = T)) %>%
-  right_join(WBAT_2021_BE_P1_belwind_70khz_60freq, by = "interval_number") %>%
-  mutate(SA = ifelse(depth == 0.0, SA_sum_filtered , SA),
-         log10_SA = ifelse(depth != 0 & log10_SA < quantile_25, -5.0, log10_SA)) %>% 
-  select(-SA_sum_filtered, -quantile_25)
-
-
-
-
-
+# This is the correct data wrangling try out
 data <- WBAT_2021_BE_P1_belwind_70khz_60freq %>%
   group_by(interval_number) %>%
-  mutate(quantile_25 = quantile(log10_SA[depth != 0], 0.0, na.rm = TRUE),    # Calculate the 25th percentile of log10_SA, ignoring NA values
+  mutate(quantile_25 = quantile(log10_SA[depth != 0], 0.75, na.rm = TRUE),    # Calculate the 25th percentile of log10_SA, ignoring NA values
          log10_SA = ifelse(log10_SA < quantile_25 & depth != 0, -5.0, log10_SA),    # Replace log10_SA values below the 25th percentile with -5.0
          SA_sum_filtered = sum(ifelse(log10_SA >= quantile_25 & depth != 0, SA, 0), na.rm = TRUE)) %>%    # Calculate the sum of SA (after filtering out low log10_SA values) for each interval_number
   ungroup() %>%
   mutate(SA = ifelse(depth == 0, SA_sum_filtered, SA)) %>%     # Replace SA at depth == 0.0 with SA_sum_filtered
   select(-SA_sum_filtered, -quantile_25) 
 
+summary(Huh)
+summary(Huh_75)
+
+# This is the correct data 0.0 code try out 
 data_depth_00 <- data %>% 
   filter(depth == 0) %>% 
   select(datetime, depth, SA, log10_SA, interval_number) %>% 
   mutate(log10_SA = log10(SA))
   
-
-
-
-ggplot(data, aes(x = log10_SA)) +
+# This is a density plot to visu
+ggplot(Huh_75, aes(x = log10_SA)) +
   geom_histogram(binwidth = .1, fill = "skyblue", color = "black") +
   labs(title = "Distribution of SA Values at -60dB for 70kHz",
        x = "log10(SA)",
@@ -109,8 +108,8 @@ ggplot(data, aes(x = log10_SA)) +
 
 
 #######################
-
-ggplot(subset(data, 
+# This is the 'I want to try something new' plot 
+ggplot(subset(Huh_75, 
               datetime > as.POSIXct("2021-07-13 10:05:29", tz = "UTC") & 
                 datetime < as.POSIXct("2021-07-13 18:05:29", tz = "UTC")), 
        aes(x = interval_number, y = depth, fill = log10_SA)) +
@@ -119,7 +118,7 @@ ggplot(subset(data,
                    datetime > as.POSIXct("2021-07-13 10:05:29", tz = "UTC") & 
                      datetime < as.POSIXct("2021-07-13 18:05:29", tz = "UTC")),
             mapping = aes(y = (log10_SA*5)), color = "purple", size = 1) +
-  scale_fill_gradientn(colors = c("lightblue", "lightblue", "red"),
+  scale_fill_gradientn(colors = c("white", "lightblue", "red"),
                        values = c(0, 0.6, 1),
                        limits = c(-5, 5),
                        name = "log10(SA)") +
@@ -131,11 +130,11 @@ ggplot(subset(data,
 
 
 ################################################################################
-# Script for the new plots
+# Function for the new plots
 ################################################################################
 
 # Define the function to plot the heatmap for a limited number of intervals (e.g., 3 iterations)
-plot_intervals_in_chunks <- function(data, gap_interval = 10, num_iterations = 3, frequency, treshold, data_drop) {
+format_SA_heatmaps <- function(data, gap_interval = 10, num_iterations = 3, frequency, treshold, data_drop) {
   
   data <- data %>% 
     filter(treshold %in% c(treshold)) %>% 
@@ -210,109 +209,69 @@ plot_intervals_in_chunks <- function(data, gap_interval = 10, num_iterations = 3
 }
 
 # Example usage with WBAT.2021_BE_belwind_70kHz_test_tres50 dataset, limiting to 3 iterations
-plot_intervals_in_chunks(WBAT_2021_BE_P1_belwind_70khz, gap_interval = 10, num_iterations = 3, frequency = 70, treshold = -60, data_drop = .75)
-
-
-# frequency, "kHz_"
-
-frequency <- c(70, 200)
-threshold <- c("-50", "-60")
-data_drop <- c(.0, .25, .50, .75)
+format_SA_heatmaps(data, gap_interval = 10, num_iterations = 3, frequency = 70, treshold = -60, data_drop = .75)
 
 
 
-for(z in unique(WBAT.tab$surveName)){                              
-  tab.filt <- WBAT.tab[WBAT.tab$surveName == z,]
-  
-  for(idxDataSet in tab.filt$surveName){                                          
-    load(file.path(dataPath, paste0('WBAT_',idxDataSet,'.RData')))
-    
-    for(j in threshold){
-    #   for(k in data_drop){
-    #     plot_intervals_in_chunks(WBAT.all, gap_interval = 10, num_iterations = 3)
-    #   }
-    }
-  }
-}
-
-
-
-  
-
-
-
-
-
-
-# Initialize progress bar
-pb <- progress_bar$new(
-  format = "  Processing [:bar] :percent | Elapsed: :elapsed | Remaining: :eta",
-  total = total_iterations,
-  clear = FALSE,
-  width = 60
-)
-
+#################################################################################
+# For Loop for all data files - preperation 
+#################################################################################
+# Define the values
 threshold <- c("-50", "-60")
 data_drop <- c(.0, .25, .50, .75)
 
 # Define the subfolder name
 subfolder <- "sub"
 
-# Progress bar initialization
+# Initialize progress bar
 total_iterations <- length(unique(WBAT.tab$surveName)) * length(threshold) * length(data_drop)
-pb <- progress::progress_bar$new(
-  format = "  [:bar] :percent :eta",
+pb <- progress_bar$new(
+  format = "  Processing [:bar] :percent | Elapsed: :elapsed | Remaining: :eta",
   total = total_iterations,
   clear = FALSE,
-  width = 60
-)
+  width = 100)
 
-# Iterate over each unique survey name
-for (z in unique(WBAT.tab$surveName)) {                              
-  # Filter the table for the current survey name
-  tab.filt <- WBAT.tab[WBAT.tab$surveName == z, ]
+#################################################################################
+# For Loop for all data files - the actual loop
+#################################################################################
+
+for (z in unique(WBAT.tab$surveName)) {                                         # Iterate over each unique survey name                          
+  tab.filt <- WBAT.tab[WBAT.tab$surveName == z, ]                               # Filter the table for the current survey name
   
-  # Iterate over each dataset in the filtered table
-  for (idxDataSet in tab.filt$surveName) {                                          
-    # Construct the path to the subfolder containing the dataset
-    data_file <- file.path(dataPath, subfolder, paste0('WBAT_', idxDataSet, '.RData'))
+  for (idxDataSet in tab.filt$surveName) {                                      # Iterate over each dataset in the filtered table                                    
+    data_file <- file.path(dataPath, subfolder, paste0('WBAT_', idxDataSet, '.RData'))  # Construct the path to the subfolder containing the dataset
     
-    # Check if the file exists and load it
-    if (file.exists(data_file)) {
+    if (file.exists(data_file)) {                                               # Check if the file exists and load it
       load(data_file)
     } else {
       message("File not found: ", data_file)
-      next  # Skip to the next dataset if file doesn't exist
+      next                                                                      # Skip to the next dataset if file doesn't exist
     }
     
-    # Extract frequency from the dataset name
-    freq_match <- stringr::str_extract(idxDataSet, "(?i)(\\d+)(?=khz$)")  # Match digits ending in 'khz', ignoring case
+    freq_match <- stringr::str_extract(idxDataSet, "(?i)(\\d+)(?=khz$)")        # Match digits ending in 'khz', ignoring case
     if (is.na(freq_match)) {
-      message("Frequency not found in surveName: ", idxDataSet)
-      next  # Skip this entry if frequency cannot be found
+      message("Frequency not found in surveName: ", idxDataSet)                 # Extract frequency from the dataset name
+      next                                                                      # Skip this entry if frequency cannot be found
     }
-    frequency <- as.numeric(freq_match)  # Convert "70kHz" to 70
+    frequency <- as.numeric(freq_match)                                         # Convert "70kHz" to 70
     
-    # Iterate over threshold and data_drop
-    for (j in threshold) {
+    
+    for (j in threshold) {                                                      # Iterate over threshold and data_drop
       for (k in data_drop) {
         tryCatch({
-          plot_intervals_in_chunks(
+          format_SA_heatmaps(
             WBAT.all, 
             gap_interval = 10, 
             num_iterations = 3, 
-            frequency = frequency,  # Pass extracted frequency
-            treshold = j,           # Pass the current threshold
-            data_drop = k           # Pass the current data_drop
+            frequency = frequency,                                              # Pass extracted frequency
+            treshold = j,                                                       # Pass the current threshold
+            data_drop = k                                                       # Pass the current data_drop
           )
         }, error = function(e) {
-          message("Error processing dataset ", idxDataSet, 
-                  " with threshold ", j, 
-                  " and data_drop ", k, 
-                  ": ", e$message)
+          message("Error processing dataset ", idxDataSet, " with threshold ", j, " and data_drop ", k, ": ", e$message)
         })
-        # Update progress bar
-        pb$tick()
+        
+        pb$tick()                                                               # Update progress bar
       }
     }
   }
