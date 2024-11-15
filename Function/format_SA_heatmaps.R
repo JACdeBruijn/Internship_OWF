@@ -3,10 +3,10 @@
 ################################################################################
 
 # Define the function to plot the heatmap for a limited number of intervals (e.g., 3 iterations)
-format_SA_heatmaps <- function(data, gap_interval = 10, num_iterations = 3, frequency, treshold, data_drop) {
+format_SA_heatmaps <- function(data, gap_interval = 10, num_iterations = 3, frequency, threshold, data_drop) {
   
   data <- data %>% 
-    filter(treshold %in% c(treshold)) %>% 
+    filter(treshold %in% c(threshold)) %>% 
     arrange(datetime) %>%
     mutate(SA = SA + 0.00001,
            log10_SA = log10(SA),
@@ -58,7 +58,7 @@ format_SA_heatmaps <- function(data, gap_interval = 10, num_iterations = 3, freq
                            limits = c(-5, 5),
                            name = "log10(SA)") +
       labs(
-        title = paste0("log10(SA) at ", idxDataSet, " ", frequency, "kHz for ", treshold, "dB with datadrop of ", data_drop, "% - ", start_interval, " to ", end_interval),
+        title = paste0("log10(SA) at ", idxDataSet, " ", "kHz for ", threshold, "dB with datadrop of ", data_drop, "% - ", start_interval, " to ", end_interval),
         x = "Time in interval Number",
         y = "Water depth (m)") +
       scale_y_continuous(sec.axis = sec_axis(~ . / 5, 
@@ -70,9 +70,9 @@ format_SA_heatmaps <- function(data, gap_interval = 10, num_iterations = 3, freq
       )
     
     # Save the plot as a PNG file with the correct date and interval range in the filename
-    output_folder <- file.path(resultPath, "SA_Heatmaps")
+    output_folder <- file.path(resultPath, "SA_Heatmaps_auto_test")
     if(!dir.exists(output_folder)) dir.create(output_folder)
-    filename <- paste0(output_folder, "/SA_Heatmap_", idxDataSet, "_", treshold, "dB_datadrop_", data_drop, "%_", start_interval, "_to_", end_interval, ".png")
+    filename <- paste0(output_folder, "/SA_Heatmap_", idxDataSet, "_", threshold, "dB_datadrop_", data_drop, "%_", start_interval, "_to_", end_interval, ".png")
     ggsave(filename, plot = plot, width = 10, height = 6)
   }
 }
