@@ -1,5 +1,5 @@
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, lubridate)
+pacman::p_load(tidyverse, lubridate, progress)
 
 rm(list=ls())
 
@@ -190,7 +190,7 @@ plot_intervals_in_chunks <- function(data, gap_interval = 10, num_iterations = 3
                            limits = c(-5, 5),
                            name = "log10(SA)") +
       labs(
-        title = paste0("log10(SA) at ", frequency, "kHz for ", treshold, "dB with datadrop of ", data_drop, "% - ", start_interval, " to ", end_interval),
+        title = paste0("log10(SA) at ", idxDataSet, " ", frequency, "kHz for ", treshold, "dB with datadrop of ", data_drop, "% - ", start_interval, " to ", end_interval),
         x = "Time in interval Number",
         y = "Water depth (m)") +
       scale_y_continuous(sec.axis = sec_axis(~ . / 5, 
@@ -204,7 +204,7 @@ plot_intervals_in_chunks <- function(data, gap_interval = 10, num_iterations = 3
     # Save the plot as a PNG file with the correct date and interval range in the filename
     output_folder <- file.path(resultPath, "SA_Heatmaps")
     if(!dir.exists(output_folder)) dir.create(output_folder)
-    filename <- paste0(output_folder, "/SA_Heatmap_", frequency, "kHz_", treshold, "dB_datadrop_", data_drop, "%_", start_interval, "_to_", end_interval, ".png")
+    filename <- paste0(output_folder, "/SA_Heatmap_", idxDataSet, "_", treshold, "dB_datadrop_", data_drop, "%_", start_interval, "_to_", end_interval, ".png")
     ggsave(filename, plot = plot, width = 10, height = 6)
   }
 }
@@ -213,18 +213,110 @@ plot_intervals_in_chunks <- function(data, gap_interval = 10, num_iterations = 3
 plot_intervals_in_chunks(WBAT_2021_BE_P1_belwind_70khz, gap_interval = 10, num_iterations = 3, frequency = 70, treshold = -60, data_drop = .75)
 
 
+# frequency, "kHz_"
+
+frequency <- c(70, 200)
+threshold <- c("-50", "-60")
+data_drop <- c(.0, .25, .50, .75)
+
+
+
+for(z in unique(WBAT.tab$surveName)){                              
+  tab.filt <- WBAT.tab[WBAT.tab$surveName == z,]
+  
+  for(idxDataSet in tab.filt$surveName){                                          
+    load(file.path(dataPath, paste0('WBAT_',idxDataSet,'.RData')))
+    
+    for(j in threshold){
+    #   for(k in data_drop){
+    #     plot_intervals_in_chunks(WBAT.all, gap_interval = 10, num_iterations = 3)
+    #   }
+    }
+  }
+}
+
+
+
+  
 
 
 
 
 
 
+# Initialize progress bar
+pb <- progress_bar$new(
+  format = "  Processing [:bar] :percent | Elapsed: :elapsed | Remaining: :eta",
+  total = total_iterations,
+  clear = FALSE,
+  width = 60
+)
 
+threshold <- c("-50", "-60")
+data_drop <- c(.0, .25, .50, .75)
 
+# Define the subfolder name
+subfolder <- "sub"
 
+# Progress bar initialization
+total_iterations <- length(unique(WBAT.tab$surveName)) * length(threshold) * length(data_drop)
+pb <- progress::progress_bar$new(
+  format = "  [:bar] :percent :eta",
+  total = total_iterations,
+  clear = FALSE,
+  width = 60
+)
 
-
-
+# Iterate over each unique survey name
+for (z in unique(WBAT.tab$surveName)) {                              
+  # Filter the table for the current survey name
+  tab.filt <- WBAT.tab[WBAT.tab$surveName == z, ]
+  
+  # Iterate over each dataset in the filtered table
+  for (idxDataSet in tab.filt$surveName) {                                          
+    # Construct the path to the subfolder containing the dataset
+    data_file <- file.path(dataPath, subfolder, paste0('WBAT_', idxDataSet, '.RData'))
+    
+    # Check if the file exists and load it
+    if (file.exists(data_file)) {
+      load(data_file)
+    } else {
+      message("File not found: ", data_file)
+      next  # Skip to the next dataset if file doesn't exist
+    }
+    
+    # Extract frequency from the dataset name
+    freq_match <- stringr::str_extract(idxDataSet, "(?i)(\\d+)(?=khz$)")  # Match digits ending in 'khz', ignoring case
+    if (is.na(freq_match)) {
+      message("Frequency not found in surveName: ", idxDataSet)
+      next  # Skip this entry if frequency cannot be found
+    }
+    frequency <- as.numeric(freq_match)  # Convert "70kHz" to 70
+    
+    # Iterate over threshold and data_drop
+    for (j in threshold) {
+      for (k in data_drop) {
+        tryCatch({
+          plot_intervals_in_chunks(
+            WBAT.all, 
+            gap_interval = 10, 
+            num_iterations = 3, 
+            frequency = frequency,  # Pass extracted frequency
+            treshold = j,           # Pass the current threshold
+            data_drop = k           # Pass the current data_drop
+          )
+        }, error = function(e) {
+          message("Error processing dataset ", idxDataSet, 
+                  " with threshold ", j, 
+                  " and data_drop ", k, 
+                  ": ", e$message)
+        })
+        # Update progress bar
+        pb$tick()
+      }
+    }
+  }
+}
 
 
 
