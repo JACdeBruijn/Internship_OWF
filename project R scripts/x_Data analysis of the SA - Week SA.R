@@ -10,10 +10,10 @@ sourceDir <- function(directory) {
   }
 }
 
-sourceDir(file.path('.','Function'))
-figurePath    <- file.path('.','Figures')
-dataPath      <- file.path('.','Data')
-resultPath    <- file.path('.','Results')
+sourceDir(file.path('.','function'))
+figurePath    <- file.path('.','figures')
+dataPath      <- file.path('.','data')
+resultPath    <- file.path('.','results')
 
 load(file = file.path(resultPath,'CPOD_WBAT_workspace.RData'))
 
@@ -71,7 +71,7 @@ ggplot(WBAT.all.summary, aes(x = as.factor(weekend_boys), y = log10(SA))) +
 
 
 
-means <- WBAT.all.summary %>%
+means <- WBAT_weekday %>%
   group_by(weekend_boys, pairingName, type) %>%
   summarize(mean_SA = mean(log10(SA), na.rm = TRUE)) %>%
   ungroup()
@@ -79,10 +79,10 @@ means <- WBAT.all.summary %>%
 ggplot(WBAT.all.summary, aes(x = as.factor(weekend_boys), y = log10(SA), colour = type)) +
   geom_segment(data = means %>%
                  pivot_wider(names_from = weekend_boys, values_from = mean_SA) %>%
-                 filter(!is.na(`a Work day`) & !is.na(`b Weekend day`)), # Ensure both means exist
+                 filter(!is.na(`Work day`) & !is.na(`Weekend day`)), # Ensure both means exist
                aes(
-                 x = "a Work day", xend = "b Weekend day",
-                 y = `a Work day`, yend = `b Weekend day`,
+                 x = "Work day", xend = "Weekend day",
+                 y = `Work day`, yend = `Weekend day`,
                  group = interaction(pairingName, type),
                  color = type
                ),
@@ -182,7 +182,7 @@ ggplot(WBAT.all.summary, aes(x = as.factor(time), y = log10(SA))) +
   ylim(-0.5, 4.5) +
   theme(# panel.grid.minor = element_blank(),
     panel.grid.major = element_line(size = 0.5, linetype = "dotted")) +
-  facet_grid(as.factor(season) ~ type)
+  facet_grid( ~ type)
 
 
 ggplot(data_filtered, aes(x = datetime, y = log10(SA), color = dayNight)) +
