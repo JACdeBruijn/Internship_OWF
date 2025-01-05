@@ -1,0 +1,9 @@
+﻿station,wreckname,code,NCN,depth,coord,loc_on_wreck,lat,lon,length,width,height,bow_deg,sunken_on,shallowest_point 
+BSW1,BSW1,,2404,25.9,website,mid,51.83984,3.23594,34,9,5,216,,
+BSW2,BSW2,,189,19.2,website,mid,51.70465,3.2406,67,14,,131,,
+grafton,HMS GRAFTON,BE-124-249-01,,19.3,website,mid,51.4071,2.81838,98.4,10.1,3.5,63,30/05/1940,mid
+birkenfels,MV BIRKENFELS,BE-139-232-01,,39,website,mid,51.64978,2.53785,156.1,18.7,31.1,169.8,07/04/1966,mid
+gardencity,MV GARDEN CITY,BE-129-218-01,,32,website,mid,51.48568,2.30535,147.6,18.5,12.4,27,19/03/1969,bow
+gardencity,,,,,qgis,closest,51.48586,2.30601,,,,,,
+grafton,,,,,qgis,closest,51.40641,2.81938,,,,,,
+birkenfels,,,,,qgis,closest,51.64916,2.53799,,,,,,

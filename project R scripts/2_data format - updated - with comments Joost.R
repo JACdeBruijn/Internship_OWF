@@ -74,7 +74,12 @@ if(processFlag){
       flagFirst <- T
       for(idxDataSet in tab.filt$surveName){                                    # Reading all the data on station and data set for pelegc fish data
         print(idxDataSet)
-        load(file.path(dataPath,paste0('WBAT_',idxDataSet,'.RData')))
+        
+        if (grepl('^2021-BE_cpower$', stationSet)) {                            # Since 2021-BE_cpower has no data it need to be skipped             
+          next 
+        } else {
+          load(file.path(dataPath,paste0('WBAT_',idxDataSet,'.RData')))
+        }
         
         WBAT.all <- WBAT.all[!is.na(WBAT.all$datetime),]
         WBAT.all$stationSet  <- paste0(WBAT.all$dataSet,'_',WBAT.all$station,'_',WBAT.all$phase)
@@ -147,8 +152,8 @@ if(processFlag){
       # Sampling the data set if minimal n = 6 bins for the first 11 bins (30 seconds bins)
       # slice_head does take out the randomization caused by only using slice
       WBAT.join <- subset(WBAT.join, IDinter %in% subset(samp.summary, n >= 6)$IDinter) %>%
-        group_by(stationSet,treshold,IDinter,frequency,phase) %>%
-        slice_head(sample(n(), min(11, n())))         
+        group_by(stationSet, treshold, IDinter, frequency, phase) %>%
+        slice_head(n = 11)        
       #sample_n(11,replace = FALSE)
       
       # summarize WBAT data per intervals
@@ -167,55 +172,33 @@ if(processFlag){
       
       WBAT.summary$stationSet   <- paste0(WBAT.summary$dataSet,'_',WBAT.summary$station)
       
-      WBAT.summary <- left_join(WBAT.summary,overview.tab,by=c('stationSet'))
+      WBAT.summary <- left_join(WBAT.summary, overview.tab, by = c('stationSet'))
       
-      
-      # samp.summary <- WBAT.join %>% group_by(stationSet,treshold,IDinter,frequency,phase) %>% summarize(n=n())
-      # 
-      # samplingSize <- seq(from=5,to=30,by=1)#c(3:10)
-      # nIter <- 1
-      # 
-      # flagFirstSamples <- T
-      # for(idxSampleSize in samplingSize){
-      #   for(idxIter in 1:nIter){
-      #     if(idxSampleSize <= max(samp.summary$n)){
-      #       WBAT.temp <- subset(WBAT.join,IDinter %in% subset(samp.summary,n >= idxSampleSize)$IDinter) %>% 
-      #         group_by(stationSet,treshold,IDinter,frequency,phase) %>%
-      #         sample_n(idxSampleSize) %>%
-      #         summarize(n=n(),
-      #                   station=unique(station),
-      #                   dataSet=unique(dataSet),
-      #                   SA=mean(SA,na.rm=T),
-      #                   depthSA=mean(depthSA,na.rm=T),
-      #                   datetime=first(datetime),
-      #                   depthIntegration=mean(depthIntegration,na.rm=T))
-      #       
-      #       WBAT.temp$SATotal <- WBAT.summary$SA[match(WBAT.temp$IDinter,WBAT.summary$IDinter)]
-      #       WBAT.temp$ratio   <- WBAT.temp$SA/WBAT.temp$SATotal
-      #       WBAT.temp$iter    <- idxIter
-      #       
-      #       if(flagFirstSamples){
-      #         WBAT.sample <- WBAT.temp
-      #         flagFirstSamples <- F
-      #       }else{
-      #         WBAT.sample <- rbind(WBAT.sample,WBAT.temp)
-      #       }
-      #     }
-      #   }
-      # }
+      # Add the Sun Position 
+      # WBAT.summary$datetime <- as.POSIXct(WBAT.summary$datetime, tz = "UTC")
+      mySunPosition <- getSunlightPosition(date = WBAT.summary$datetime,
+                                           lat = unique(WBAT.summary$lat),
+                                           lon = unique(WBAT.summary$lon))
+      WBAT.summary$sunPos_altitude <- mySunPosition$altitude * (180 / pi)
+      WBAT.summary$sunPos_azimuth <- mySunPosition$azimuth * (180 / pi) + 180
+      WBAT.summary$sunPos_azimuth <- ifelse(WBAT.summary$sunPos_azimuth >= 360,  # Condition
+                                            WBAT.summary$sunPos_azimuth - 360,  # If TRUE, subtract 360 
+                                            WBAT.summary$sunPos_azimuth)
       
       # The lat and lon are corrected according to the ETN database
       mySunlightTimes <- getSunlightTimes(date = as.Date(WBAT.summary$datetime),
                                           lat = unique(WBAT.summary$lat),
                                           lon = unique(WBAT.summary$lon), tz = "UTC") # hack, lat/lon needs to be inputed for each station
-      WBAT.summary$hourSunset    <- hour(mySunlightTimes$sunset)+minute(mySunlightTimes$sunset)/60+second(mySunlightTimes$sunset)/60/60
-      WBAT.summary$hourSunrise   <- hour(mySunlightTimes$sunrise)+minute(mySunlightTimes$sunrise)/60+second(mySunlightTimes$sunrise)/60/60
+      WBAT.summary$hourSunset    <- hour(mySunlightTimes$sunset) + minute(mySunlightTimes$sunset)/60 + second(mySunlightTimes$sunset)/60/60
+      WBAT.summary$hourSunrise   <- hour(mySunlightTimes$sunrise) + minute(mySunlightTimes$sunrise)/60 + second(mySunlightTimes$sunrise)/60/60
       WBAT.summary$sunset <- mySunlightTimes$sunset
       WBAT.summary$sunrise <- mySunlightTimes$sunrise
       
       WBAT.summary$dayNight <- 'night'
       WBAT.summary$dayNight[(WBAT.summary$sunrise <= WBAT.summary$datetime) & (WBAT.summary$datetime <= WBAT.summary$sunset)] <- 'day'
     }
+    
+    # Here "CPOD_2021-BE_cpower" should still be in WBAT.summary based on the left_join of overview.tab
     
     # exception for HKZ and HKN data sets that don't have CPOD data
     if(dim(tab.filt)[1] != 0){

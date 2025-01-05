@@ -5,6 +5,7 @@ year,frequency,dataSet,station,surveName,lsss_name,,annotated_sets,SA_exported,2
 2021,70,2021-BE,birkenfels,2021-BE_P2_birkenfels_70khz,S4_P2022_APELAFICO_2021-BE[2],,1,1,0,0
 2021,70,2021-BE,belwind,2021-BE_P1_belwind_70khz,S5_P2022_APELAFICO_2021-BE[2],,1,1,0,0
 2021,70,2021-BE,belwind,2021-BE_P2_belwind_70khz,S6_P2022_APELAFICO_2021-BE[2],,1,1,0,0
+2021,70,2021-BE,cpower,2021-BE_cpower_70khz,,,1,1,0,0
 2021,200,2021-BE,grafton,2021-BE_P1_grafton_200khz,S7_P2022_APELAFICO_2021-BE[2],,1,1,-1,0
 2021,200,2021-BE,grafton,2021-BE_P2_grafton_200khz,S8_P2022_APELAFICO_2021-BE[2],,1,1,1,0
 2021,200,2021-BE,birkenfels,2021-BE_P1_birkenfels_200khz,S9_P2022_APELAFICO_2021-BE[2],,1,1,1,0
