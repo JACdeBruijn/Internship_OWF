@@ -1,7 +1,8 @@
 ################################################################################
 # Script for plotting - 08/12/24 ----
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see)
+pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see,
+               ggstar, ggtext)
 
 rm(list=ls())
 
@@ -39,7 +40,8 @@ WBAT.all.summary <- WBAT.all.summary %>%
          )
 
 ################################################################################
-# Mutating the depthMaxR in the data set - update: this is not used in the final data analysis anymore as the imputation is not based on correct things
+# Mutating the depthMaxR in the data set 
+# ---- update: this is not used in the final data analysis anymore as the imputation is not based on correct things
 
 # WBAT.all.summary %>%                                                            # Checking the depthIntegration per stationSet to see if the imputation of depthMaxR makes sense
 #   group_by(stationSet, pairingName) %>%
@@ -55,9 +57,7 @@ WBAT.all.summary <- WBAT.all.summary %>%
 
 # Sub-setting on threshold -50
 WBAT_overview <- WBAT.all.summary %>% 
-  filter(n >= 8,  
-         # depthMaxR > 0.00,
-         treshold == -50) 
+  filter(n >= 8, treshold == -50) 
 
 # Some basic visualisations 
 hist(WBAT.all.summary$n)
@@ -135,11 +135,37 @@ WBAT_overview_sum <- WBAT_overview_sum %>%
                  as.numeric(factor(type))[type == "OWF"]),
             .groups = "drop") %>%
   left_join(WBAT_overview_sum, join_by(pairingName, frequency)) %>% 
-  mutate(line_color = ifelse(slope > 0, "blue", "red"))
+  mutate(line_color = ifelse(slope > 0, "#e4d49a", "#91c1ee"))
+
+
+
+
+### Testing for black but different colours update =---
+manual_shapes <- c(1, 5, 13, 15, 23, 28)[seq_len(6)]
+
+ggplot(subset(WBAT_overview_sum, frequency == 70 & pairingName != "2021-BE_2"), 
+       aes(x = type, y = mean_SA)) +
+  geom_line(aes(group = pairingName, color = line_color), linewidth = 0.75, linetype = "solid") +
+  geom_star(aes(starshape = pairingName), color = "black", fill = "black", size = 6) +
+  scale_starshape_manual(values = manual_shapes)
+
+
+
+#ccac3d for offshore windfarm
+#darker line color #796620 for farm
+#lighter line color #e4d49a for farm
+
+#388fe0 for Shipwereck
+#darker line color #154e84 for wreck
+#lighter line color for #91c1ee wreck
+
+
+
+
 
 pairing_colors <- setNames(RColorBrewer::brewer.pal(n = length(unique(WBAT_overview_sum$pairingName)), "Set1"),
                            unique(WBAT_overview_sum$pairingName))
-line_colors <- c("red" = "red", "blue" = "blue")
+line_colors <- c("#e4d49a" = "#e4d49a", "#91c1ee" = "#91c1ee")
 all_colors <- c(pairing_colors, line_colors)
 
 # Plotting only the slope ######################################################
@@ -193,32 +219,69 @@ for (type in names(data_list)) {
 print(p)
 
 
+# Editing the names of the pairingName
+WBAT_overview_sum <- WBAT_overview_sum %>% 
+  mutate(pairingName = str_replace_all(pairingName, c("2021-BE_1" = "July-Aug/21 - Birk-/Belw-",
+                                                      "2023-BSW_1" = "May-June/23 - Bors-1/Bors-4",
+                                                      "2023-BSW_2" = "May-June/23 - Bors-2/Bors-3",
+                                                      "2023-BE_1" = "July-Sept/23 - Gard-/Belw-",
+                                                      "2023-BE_2" = "July-Sept/23 - Graf-/Cpow-",
+                                                      "2024-BE_1" = "Oct-Dec/23 - Graf-/Cpow-"))) %>% 
+  mutate(pairingName = factor(pairingName, levels = ))
+  
+WBAT_overview_sum <- WBAT_overview_sum %>%
+  mutate(pairingName = factor(pairingName, 
+                              levels = c("2021-BE_1", "2023-BSW_1", "2023-BSW_2", "2023-BE_1", "2023-BE_2", "2024-BE_1"), 
+                              label = c("July-Aug/21 - Birk-/Belw-",
+                                        "May-June/23 - Bors-1/Bors-4",
+                                        "May-June/23 - Bors-2/Bors-3",
+                                        "July-Sept/23 - Gard-/Belw-",
+                                        "July-Sept/23 - Graf-/Cpow-",
+                                        "Oct-Dec/23 - Graf-/Cpow-")))
 
 ################################################################################ Testing
 test <- ggplot(subset(WBAT_overview_sum, frequency == 70), aes(x = type, y = mean_SA)) +
   geom_line(aes(group = pairingName, color = line_color), 
-            linewidth = 1.25, lineend = "round") +
-  geom_point(aes(color = pairingName), size = 6,
-             position = position_jitter(width = 0.1, height = 0)
-             ) +
-  geom_errorbar(aes(ymin = mean_SA - SAsd, ymax = mean_SA + SAsd, color = 'black'), width = 0.05,
-                position = position_jitter(width = 0.1, height = 0)
-                ) +
+            linewidth = 1.25, lineend = "round",
+            show.legend = F) +
   scale_color_manual(values = all_colors) +
-  coord_cartesian(ylim = c(-0.5, 4)) +
-  labs(x = "Type", y = "Mean log10(SA)") +
-  theme_minimal()
+  geom_star(aes(starshape = pairingName), 
+            color = "black", 
+            fill = NA,
+            starstroke = 1,
+            size = 6) +
+  scale_starshape_manual(values = manual_shapes,
+                         name = "Period & Location per pair") +
+  coord_cartesian(ylim = c(-0.25, 4)) +
+  labs(x = "Type", y = "Mean log<sub>10</sub>(SA)") +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_text(size = 20),
+    axis.text.x = element_text(size = 15, color = "black"),
+    axis.title.y = element_markdown(size = 20),
+    axis.text.y = element_text(size = 15, color = "black"),
+    legend.position = "inside",
+    legend.position.inside = c(0.5, .8),
+    legend.background = element_rect(fill = "white", size = .5),
+    legend.margin = margin(3, 3, 3, 3),
+    legend.key.size = unit(20, "pt")
+  )
 
 data_list <- split(subset(WBAT_overview, frequency == 70), subset(WBAT_overview, frequency == 70)$type)
 
 for (type in names(data_list)) {
   if (type == "OWF") {
-    # For "control", plot on one side
+    # For "OWF", plot on one side
     test <- test +
       geom_violinhalf(
         data = data_list[[type]],
-        mapping = aes(x = type, y = log10(SA), fill = type), width = 0.5, flip = F,
-        position = position_nudge(x = 0.10)) +
+        mapping = aes(x = type, y = log10(SA)), 
+        fill = "#ccac3d",
+        width = 0.5, 
+        flip = F,
+        linewidth = NA,
+        position = position_nudge(x = 0.10),
+        show.legend = F) +
       geom_boxplot(
         data = data_list[[type]],
         mapping = aes(x = type, y = log10(SA)),
@@ -230,15 +293,20 @@ for (type in names(data_list)) {
         linetype = "solid") +
       stat_summary(
         data = data_list[[type]], mapping = aes(x = type, y = log10(SA)),
-        fun = mean, geom = "point", color = "black", size = 3, shape = 17,  
+        fun = mean, geom = "point", color = "black", size = 6, shape = 17,  
         position = position_nudge(x = 0.15))
     
   } else if (type == "Control") {
     test <- test +
       geom_violinhalf(
         data = data_list[[type]],
-        mapping = aes(x = type, y = log10(SA), fill = type), width = 0.5, flip = T,
-        position = position_nudge(x = -0.10)) +
+        mapping = aes(x = type, y = log10(SA)), 
+        fill = "#388fe0",
+        width = 0.5, 
+        flip = T,
+        linewidth = NA,
+        position = position_nudge(x = -0.10),
+        show.legend = F) +
       geom_boxplot(
         data = data_list[[type]],
         mapping = aes(x = type, y = log10(SA)),
@@ -250,16 +318,19 @@ for (type in names(data_list)) {
         linetype = "solid") +
       stat_summary(
         data = data_list[[type]], mapping = aes(x = type, y = log10(SA)),
-        fun = mean, geom = "point", color = "black", size = 3, shape = 17,  
+        fun = mean, geom = "point", color = "black", size = 6, shape = 17,  
         position = position_nudge(x = -0.15))
   }
 }
 
 print(test)
 
+# Saving the plot
 taf.png(file.path(figurePath, paste0("WBAT overall2 - pairwise comparison - 70khz.png")))
 print(test)
 dev.off()
+
+ggsave(filename = file.path(figurePath,'UPDATED - WBAT overall pairwise comparsion - 70kHz.png'), plot = test, width = 15, height = 10)
 
 ################################################################################
 # Working on WBAT_season showing SA over the seasons ----

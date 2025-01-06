@@ -2,7 +2,7 @@
 # Script for plotting - 08/12/24 ----
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see, suncalc, gridExtra,
-               grid, RColorBrewer)
+               grid, RColorBrewer, ggtext)
 
 rm(list=ls())
 
@@ -123,20 +123,45 @@ Sunny <- Sunny %>%
   arrange(stationSet, datetime) %>% 
   ungroup()
 
+# Create a vertical gradient matrix
+gradient_colors_morning <- colorRampPalette(c("black", "white"))(100)
+gradient_matrix_morning <- matrix(gradient_colors_morning, nrow = 1, ncol = 100)
+vertical_gradient_morning <- rasterGrob(image = gradient_matrix_morning, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
+
+gradient_colors_evening <- colorRampPalette(c("white", "black"))(100)
+gradient_matrix_evening <- matrix(gradient_colors_evening, nrow = 1, ncol = 100)
+vertical_gradient_evening <- rasterGrob(image = gradient_matrix_evening, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
+
 # Plotting the first 2 phases 
 p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = log10(SA), fill = phase_sun)) +
+  annotation_custom(vertical_gradient_morning, 
+                    xmin = 4.45, xmax = 6.5, 
+                    ymin = -Inf, ymax = Inf) +
+  annotate("rect", 
+           xmin = -Inf, xmax = 4.5, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "black") +
+  geom_vline(xintercept = 6.5, linetype = "dashed") +
   geom_boxplot(outlier.shape = NA) +
   coord_cartesian(ylim = c(-0.2, 4)) +
-  scale_x_discrete(
-    name = "Sun altitude around Sunrise (degrees)",
-    labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x)) +
+  labs(x = "Sun altitude around Sunrise (degrees)", y = "Mean log<sub>10</sub>(SA)") +
   scale_fill_manual(values = c("Morning" = "coral", "Dawn" = "lightblue")) +
   theme_classic() +
   theme(
-    legend.position="none")
+    legend.position = "none",
+    axis.title.y = element_markdown()
+    )
 
 # Plotting the 3 and the 4 phases
 p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = log10(SA), fill = phase_sun)) +
+  annotation_custom(vertical_gradient_evening, 
+                    xmin = 7.5, xmax = 9.5, 
+                    ymin = -Inf, ymax = Inf) +
+  annotate("rect", 
+           xmin = 9.5, xmax = Inf, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "black") +
+  geom_vline(xintercept = 7.5, linetype = "dashed") +
   geom_boxplot(outlier.shape = NA) +
   coord_cartesian(ylim = c(-0.2, 4)) +
   scale_x_discrete(
@@ -144,7 +169,6 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(Sunny, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
   scale_fill_manual(values = c("Evening" = "coral", "Night" = "lightblue")) +
-  geom_vline(xintercept = "0") +
   theme_classic() +
   theme(
     legend.position="none",
@@ -156,7 +180,7 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
 
 plot <- grid.arrange(p1, p2, nrow = 1)
 
-ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise.png'), plot = plot, width = 15, height = 10)
+ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient.png'), plot = plot, width = 15, height = 10)
 
 
 effe_tellen <- Sunny %>%
