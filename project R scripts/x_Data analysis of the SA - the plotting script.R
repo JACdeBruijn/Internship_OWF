@@ -1,8 +1,8 @@
 ################################################################################
 # Script for plotting - 08/12/24 ----
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see,
-               ggstar, ggtext)
+pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see, gridExtra,
+               grid, RColorBrewer, ggstar, ggtext)
 
 rm(list=ls())
 
@@ -59,7 +59,7 @@ WBAT.all.summary <- WBAT.all.summary %>%
 WBAT_overview <- WBAT.all.summary %>% 
   filter(n >= 8, treshold == -50) 
 
-# Some basic visualisations 
+# Some basic visualizations 
 hist(WBAT.all.summary$n)
 hist(WBAT_overview$n)
 str(WBAT.all.summary)
@@ -220,21 +220,12 @@ print(p)
 
 
 # Editing the names of the pairingName
-WBAT_overview_sum <- WBAT_overview_sum %>% 
-  mutate(pairingName = str_replace_all(pairingName, c("2021-BE_1" = "July-Aug/21 - Birk-/Belw-",
-                                                      "2023-BSW_1" = "May-June/23 - Bors-1/Bors-4",
-                                                      "2023-BSW_2" = "May-June/23 - Bors-2/Bors-3",
-                                                      "2023-BE_1" = "July-Sept/23 - Gard-/Belw-",
-                                                      "2023-BE_2" = "July-Sept/23 - Graf-/Cpow-",
-                                                      "2024-BE_1" = "Oct-Dec/23 - Graf-/Cpow-"))) %>% 
-  mutate(pairingName = factor(pairingName, levels = ))
-  
 WBAT_overview_sum <- WBAT_overview_sum %>%
   mutate(pairingName = factor(pairingName, 
                               levels = c("2021-BE_1", "2023-BSW_1", "2023-BSW_2", "2023-BE_1", "2023-BE_2", "2024-BE_1"), 
                               label = c("July-Aug/21 - Birk-/Belw-",
-                                        "May-June/23 - Bors-1/Bors-4",
-                                        "May-June/23 - Bors-2/Bors-3",
+                                        "May-June/23 - Bors 1/Bors 4",
+                                        "May-June/23 - Bors 2/Bors 3",
                                         "July-Sept/23 - Gard-/Belw-",
                                         "July-Sept/23 - Graf-/Cpow-",
                                         "Oct-Dec/23 - Graf-/Cpow-")))
@@ -326,20 +317,14 @@ for (type in names(data_list)) {
 print(test)
 
 # Saving the plot
-taf.png(file.path(figurePath, paste0("WBAT overall2 - pairwise comparison - 70khz.png")))
-print(test)
-dev.off()
-
-ggsave(filename = file.path(figurePath,'UPDATED - WBAT overall pairwise comparsion - 70kHz.png'), plot = test, width = 15, height = 10)
+ggsave(filename = file.path(figurePath, 'UPDATED2 with 2024-BE - WBAT overall pairwise comparsion - 70kHz.png'), plot = test, width = 15, height = 10)
 
 ################################################################################
 # Working on WBAT_season showing SA over the seasons ----
 ################################################################################
 # Sub-setting on threshold -50 & mutating season
 WBAT_season <- WBAT.all.summary %>%
-  filter(n >= 8, 
-         # depthMaxR > 0.25, 
-         treshold == -50) %>% 
+  filter(n >= 8, treshold == -50) %>% 
   mutate(season = case_when(
     dataSet == "2021-BE" ~ "Summer",
     dataSet == "2023-BE" ~ "Spring",
@@ -349,15 +334,15 @@ WBAT_season <- WBAT.all.summary %>%
 
 str(WBAT_season)
 
-# Overview of seasons
-taf.png(file.path(figurePath, paste0("WBAT season - grouped on Type - 70khz.png")))
+# Overview of seasons - Not needed for in the presentations 
 ggplot(subset(WBAT_season, frequency == 70), aes(x = season, y = log10(SA), fill = type)) +
   geom_boxplot() +
   coord_cartesian(ylim = c(0, 4)) +
   labs(x = "Type", y = "Mean log10(SA)") +
   theme_minimal()
   # theme(legend.position = "none")
-dev.off()
+
+ggsave(filename = file.path(figurePath, 'WBAT season - grouped on Type - 70khz.png'), plot = test, width = 15, height = 10)
 
 
 # Summarizing mean_SA, mutate slope & give colors
@@ -365,7 +350,10 @@ WBAT_season_sum <- WBAT_season %>%
   group_by(stationSet, pairingName, type, pairing, frequency, season) %>% 
   summarise(mean_SA = mean(log10(SA), na.rm = T),
             SAsd = sd(log10(SA), na.rm = T),
-            sem_SA = sd(log10(SA), na.rm = TRUE) / sqrt(n())) 
+            sem_SA = sd(log10(SA), na.rm = TRUE) / sqrt(n()),
+            Q1_SA = quantile(log10(SA), probs = 0.25, na.rm = TRUE),  # First quartile (Q1)
+            Q3_SA = quantile(log10(SA), probs = 0.75, na.rm = TRUE)   # Third quartile (Q3)
+            ) 
 
 WBAT_season_sum <- WBAT_season_sum %>% 
   group_by(pairingName, frequency) %>%
@@ -375,29 +363,35 @@ WBAT_season_sum <- WBAT_season_sum %>%
                  as.numeric(factor(type))[type == "OWF"]),
             .groups = "drop") %>%
   left_join(WBAT_season_sum, join_by(pairingName, frequency)) %>% 
-  mutate(line_color = ifelse(slope > 0, "blue", "red"))
+  mutate(line_color = ifelse(slope > 0, "#e4d49a", "#91c1ee"))
+
 
 pairing_colors_season <- setNames(RColorBrewer::brewer.pal(n = length(unique(WBAT_season_sum$pairingName)), "Set1"),
                            unique(WBAT_season_sum$pairingName))
-line_colors_season <- c("red" = "red", "blue" = "blue")
+line_colors_season <- c("#e4d49a" = "#e4d49a", "#91c1ee" = "#91c1ee")
 all_colors_season <- c(pairing_colors_season, line_colors_season)
 
 # Plotting grouped on season
-taf.png(file.path(figurePath, paste0("WBAT season - grouped on Type with pairwise comparison split on season - 70khz.png")))
-ggplot(subset(WBAT_season_sum, frequency == 70), aes(x = type, y = mean_SA)) +
+p1_season <- ggplot(subset(WBAT_season_sum, frequency == 70), aes(x = type, y = mean_SA)) +
+  geom_errorbar(aes(
+    # ymin = Q1_SA,  # First quartile (lower bound)
+    # ymax = Q3_SA   # Third quartile (upper bound)
+    ymin = mean_SA - sem_SA,  # Lower bound of error bar
+    ymax = mean_SA + sem_SA  # Upper bound of error bar
+  ), width = 0.2, linewidth = 0.5) +
   geom_line(aes(group = pairingName, color = line_color), 
             linewidth = 1.25, lineend = "round") +
-  geom_point(aes(color = pairingName), size = 6) +
-  scale_color_manual(values = all_colors_season) +
+  geom_point(aes(color = type), size = 6) +
+  scale_color_manual(values = c("#388fe0", "#ccac3d", "#91c1ee", "#e4d49a")) +
   # coord_cartesian(ylim = c(0, 3.5)) +
   facet_grid(~season) +
   labs(x = "Type", y = "Mean log10(SA)") +
   theme_minimal() 
-dev.off()
+
+ggsave(filename = file.path(figurePath, "WBAT season - grouped on Type with pairwise comparison split on season - 70khz.png"), plot = p1_season, width = 15, height = 10)
 
 # Season per pairing
-taf.png(file.path(figurePath, paste0("WBAT season - grouped on Type with pairwise comparison - 70khz.png")))
-ggplot(subset(WBAT_season_sum, frequency == 70), aes(x = type, y = mean_SA)) +
+p2_season <- ggplot(subset(WBAT_season_sum, frequency == 70), aes(x = type, y = mean_SA)) +
   geom_line(aes(group = pairingName, color = line_color), 
             linewidth = 1.25, lineend = "round") +
   geom_point(aes(color = pairingName), size = 6) +
@@ -405,7 +399,8 @@ ggplot(subset(WBAT_season_sum, frequency == 70), aes(x = type, y = mean_SA)) +
   # coord_cartesian(ylim = c(0, 3.5)) +
   labs(x = "Type", y = "Mean log10(SA)") +
   theme_minimal() 
-dev.off()
+
+ggsave(filename = file.path(figurePath, "WBAT season - grouped on Type with pairwise comparison - 70khz.png"), plot = p2_season, width = 15, height = 10)
 
 ################################################################################
 # Working on WBAT_weekday showing SA over the different weekdays and workdays/weekenddays ----
@@ -413,9 +408,7 @@ dev.off()
 
 # Sub-setting on threshold -50 & mutating season
 WBAT_weekday <- WBAT.all.summary %>%
-  filter(n >= 8, 
-         # depthMaxR > 0.25, 
-         treshold == -50) %>% 
+  filter(n >= 8, treshold == -50) %>% 
   mutate(week_day = wday(datetime, label = TRUE, abbr = FALSE) %>% 
            as.character()) %>%
   mutate(week_day = factor(week_day, levels = c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>% 
@@ -449,32 +442,67 @@ dev.off()
 ################################################################################
 # Working on week plotting showing SA per over the week numbers ----
 ################################################################################
-
-
 WBAT_weeknumber <- WBAT.all.summary %>%
   filter(n >= 8, treshold == -50) %>% 
-  mutate(week_num = isoweek(datetime))
+  mutate(week_num = isoweek(datetime)) 
 
-taf.png(file.path(figurePath, paste0("WBAT week_number - grouped on Type  - 70khz.png")))
-ggplot(subset(WBAT_weeknumber, frequency == 70), aes(x = as.factor(week_num), y = log10(SA), fill = type)) +
-geom_boxplot() +
-  coord_cartesian(ylim = c(0, 4)) +
-  theme_minimal()
-dev.off()
+test_week <- WBAT_weeknumber %>% 
+  complete(week_num = seq(min(week_num, na.rm = T), max(week_num, na.rm = T), by = 1)) 
 
-seasons <- tibble(
-  season = c("Spring", "Summer", "Autumn", "Winter"),
-  start_week = c(11, 25, 38, 51),  # Based on approximate week transitions
-  end_week = c(24, 37, 50, 52),    # Adjust week ranges for each season
-  color = c("green", "red", "brown", "blue"))
+all_weeks <- tibble(week_num = seq(min(WBAT_weeknumber$week_num, na.rm = TRUE), 
+                                   max(WBAT_weeknumber$week_num, na.rm = TRUE), 
+                                   by = 1))
 
-ggplot(subset(WBAT_weeknumber, frequency == 70), aes(x = as.factor(week_num), y = log10(SA), fill = type)) +
-  geom_rect(data = seasons,
-            aes(xmin = start_week, xmax = end_week, ymin = -Inf, ymax = Inf, fill = season),
-            inherit.aes = FALSE, alpha = 0.2) +
-  geom_boxplot() +
-  coord_cartesian(ylim = c(0, 4)) +
+# Join the full sequence with the original data
+WBAT_weeknumber <- all_weeks %>%
+  left_join(WBAT_weeknumber, by = "week_num") %>% 
+  filter(!week_num %in% c("18", "49"))
+
+unique(WBAT_weeknumber$week_num)
+
+p1_weeknum <- ggplot(subset(WBAT_weeknumber, frequency == 70), aes(x = as.factor(week_num), y = log10(SA), fill = type)) +
+  annotate("rect", 
+           xmin = .5, xmax = 7, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "#92c84c", alpha = .3) +
+  annotate("rect", 
+           xmin = 7, xmax = 19, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "#f47155", alpha = .3) +
+  annotate("rect", 
+           xmin = 19, xmax = 30.5, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "#f7b354", alpha = .3) +
+  geom_boxplot(outlier.shape = NA) +
+  scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
+  coord_cartesian(ylim = c(0, 3.5)) +
+  scale_x_discrete(limits = factor(sort(unique(WBAT_weeknumber$week_num)))) +
+  theme_classic() +
+  theme(
+    legend.position = "none",
+    # legend.position.inside = c(),
+    axis.title.x = element_blank()
+  )
+
+station_sets_per_week <- WBAT_weeknumber %>%
+  group_by(week_num) %>%
+  summarise(unique_station_sets = n_distinct(stationSet), .groups = "drop") %>% 
+  mutate(unique_station_sets = if_else(unique_station_sets == 1, 0, unique_station_sets))
+
+# Create a plot to show the number of unique station sets per week_num
+p2_weeknum <- ggplot(station_sets_per_week, aes(x = as.factor(week_num), y = unique_station_sets)) +
+  geom_bar(stat = "identity", fill = "skyblue", width = .8) +
+  geom_text(aes(label = unique_station_sets), vjust = .2, size = 4) +
+  labs(x = "Week Number", y = "Number of Unique Station Sets") +
   theme_classic()
+
+lay <- rbind(c(1),
+             c(1),
+             c(2))
+
+plot <- grid.arrange(p1_weeknum, p2_weeknum, layout_matrix = lay)
+
+ggsave(filename = file.path(figurePath, "WBAT weeknummber2 - grouped on Type - 70khz.png"), plot = plot, width = 15, height = 10)
 
 
 
@@ -484,11 +512,8 @@ ggplot(subset(WBAT_weeknumber, frequency == 70), aes(x = as.factor(week_num), y 
 
 # Sub-setting on threshold -50 & mutating hour
 WBAT_dayNight <- WBAT.all.summary %>%
-  filter(n >= 8, 
-         # depthMaxR > 0.25, 
-         treshold == -50) 
+  filter(n >= 8, treshold == -50) 
 
-taf.png(file.path(figurePath, paste0("WBAT dayNight - 70khz.png")))
 ggplot(subset(WBAT_dayNight, frequency == 70 & pairingName != "2021-BE_2"), 
              aes(x = type, y = log10(SA), fill = dayNight)) +
   geom_boxplot() +
@@ -499,7 +524,8 @@ ggplot(subset(WBAT_dayNight, frequency == 70 & pairingName != "2021-BE_2"),
   coord_cartesian(ylim = c(0.1, 4)) +
   theme_minimal() +
   facet_grid(~ pairingName)
-dev.off()
+
+ggsave(filename = file.path(figurePath, "WBAT dayNight - 70khz.png"), plot = p2_season, width = 15, height = 10)
 
 # Testing ----------
 WBAT_dayNight_sum <- WBAT_dayNight %>%
@@ -513,16 +539,16 @@ WBAT_dayNight_sum <- WBAT_dayNight_sum %>%
   summarise(slope = (mean_SA[dayNight == "night"] - mean_SA[dayNight == "day"]) / (as.numeric(factor(dayNight))[dayNight == "night"] - as.numeric(factor(dayNight))[dayNight == "day"]),
             .groups = "drop") %>%
   left_join(WBAT_dayNight_sum, join_by(stationSet, frequency)) %>% 
-  mutate(line_color = ifelse(slope > 0, "blue", "red"))
+  mutate(line_color = ifelse(slope > 0, "lightblue", "coral"))
 
 custom_palette <- colorRampPalette(RColorBrewer::brewer.pal(9, "Set1"))
 pairing_colors_dayNight <- setNames(custom_palette(length(unique(WBAT_dayNight_sum$stationSet))), unique(WBAT_dayNight_sum$stationSet))
 
-line_colors_dayNight <- c("red" = "red", "blue" = "blue")
+line_colors_dayNight <- c("lightblue" = "lightblue", "coral" = "coral")
 all_colors_dayNight <- c(pairing_colors_dayNight, line_colors_dayNight)
 
 
-taf.png(file.path(figurePath, paste0("WBAT dayNight pairwise comparison - 70khz.png")))
+
 ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA)) +
   geom_line(aes(group = stationSet, color = line_color), 
             linewidth = 1.25, lineend = "round") +
@@ -531,7 +557,8 @@ ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA
   # coord_cartesian(ylim = c(0, 3.5)) +
   labs(x = "dayNight", y = "Mean log10(SA)") +
   theme_minimal() 
-dev.off()
+
+ggsave(filename = file.path(figurePath, "WBAT dayNight pairwise comparison - 70khz.png"), plot = p2_season, width = 15, height = 10)
 
 ggplot(subset(WBAT_dayNight_sum, frequency == 70 & type == "OWF"), aes(x = dayNight, y = mean_SA)) +
   geom_line(aes(group = stationSet, color = line_color), 
@@ -552,9 +579,9 @@ ggplot(subset(WBAT_dayNight_sum, frequency == 70 & type == "Control"), aes(x = d
   theme_minimal() 
 
 ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA)) +
-  geom_line(aes(group = stationSet, color = line_color), 
+  geom_line(aes(group = pairingName, color = line_color), 
             linewidth = 1.25, lineend = "round") +
-  geom_point(aes(color = stationSet), size = 6) +
+  geom_point(aes(color = pairingName), size = 6) +
   scale_color_manual(values = all_colors_dayNight) +
   # coord_cartesian(ylim = c(0, 3.5)) +
   labs(x = "dayNight", y = "Mean log10(SA)") +
@@ -563,13 +590,11 @@ ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA
 
 
 # Creating it on type 
-WBAT_dayNight_sum$type <- factor(WBAT_dayNight_sum$type, levels = c("OWF", "Control"))
-
-pairing_colors_dayNight <- setNames(c("lightcoral", "lightblue"), unique(WBAT_season_sum$type))
-line_colors_dayNight <- c("red" = "red", "blue" = "blue")
+pairing_colors_dayNight <- setNames(c("coral", "lightblue"), unique(WBAT_season_sum$type))
+line_colors_dayNight <- c("lightblue" = "lightblue", "coral" = "coral")
 all_colors_dayNight <- c(pairing_colors_dayNight, line_colors_dayNight)
 
-taf.png(file.path(figurePath, paste0("WBAT dayNight on type - 70khz.png")))
+#WBAT dayNight on type - 70khz.png
 ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA)) +
   geom_line(aes(group = stationSet, color = line_color), 
             linewidth = 1.25, lineend = "round") +
@@ -581,7 +606,7 @@ ggplot(subset(WBAT_dayNight_sum, frequency == 70), aes(x = dayNight, y = mean_SA
   # coord_cartesian(ylim = c(0, 3.5)) +
   labs(x = "dayNight", y = "Mean log10(SA)") +
   theme_minimal() 
-dev.off()
+
 
 
 
@@ -593,9 +618,7 @@ dev.off()
 
 # Sub-setting on threshold -50 & mutating hour
 WBAT_hour <- WBAT.all.summary %>%
-  filter(n >= 8, 
-         # depthMaxR > 0.00, 
-         treshold == -50) %>% 
+  filter(n >= 8, treshold == -50) %>% 
   mutate(time = as.numeric(format(datetime, "%H")))
 
 str(WBAT_hour)

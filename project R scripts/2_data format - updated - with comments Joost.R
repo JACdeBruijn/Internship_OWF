@@ -205,7 +205,7 @@ if(processFlag){
       if(!(unique(WBAT.summary$dataSet) %in% c('2022-HKZ','2023-HKN'))){
         CPOD.stationSet <- strsplit(stationSet,' ')[[1]][1]
         # summarize CPOD
-        CPOD.current <- subset(CPOD.all,dataSet_station == CPOD.stationSet)
+        CPOD.current <- subset(CPOD.all, dataSet_station == CPOD.stationSet)
         if(CPOD.stationSet == "2023-BSW_274174"){
           CPOD.current$stationSet <- "2023-BSW_274174 BSW1"
         }

@@ -4,9 +4,9 @@ format_CPOD <- function(CPOD.data){
   # break down data in minutes
   # ----------------------------------------
   dat_minute <- CPOD.data
-  dat_minute$timeIci_str <- as.POSIXct(dat_minute$timeIci_str,format='%Y-%m-%d %H:%M:%S',tz='UTC')
+  dat_minute$timeIci_str <- as.POSIXct(dat_minute$timeIci_str, format='%Y-%m-%d %H:%M:%S', tz='UTC')
   my.fun <- function(x) as.POSIXct(x, tz = "UTC")
-  dat_minute$time_minute    <- unlist(lapply(cut(dat_minute$timeIci_str, breaks = "1 min"),my.fun))
+  dat_minute$time_minute    <- unlist(lapply(cut(dat_minute$timeIci_str, breaks = "1 min"), my.fun))
   dat_minute$time_min_num <- dat_minute$time_minute
   
   dat_minute <-   dat_minute %>% 
@@ -23,6 +23,16 @@ format_CPOD <- function(CPOD.data){
   dat_minute$all_no_buzz  <- dat_minute$inter+dat_minute$other
   dat_minute$all          <- dat_minute$inter+dat_minute$other+dat_minute$buzz
   dat_minute$buzz_ratio   <- dat_minute$all_buzz/dat_minute$all
+
+  # Putting in the sun position!!!!
+  mySunPosition <- getSunlightPosition(date = dat_minute$time_minute,
+                                       lat = unique(dat_minute$lat),
+                                       lon = unique(dat_minute$lon))
+  dat_minute$sunPos_altitude <- mySunPosition$altitude * (180 / pi)
+  dat_minute$sunPos_azimuth <- mySunPosition$azimuth * (180 / pi) + 180
+  dat_minute$sunPos_azimuth <- ifelse(dat_minute$sunPos_azimuth >= 360,  # Condition
+                                      dat_minute$sunPos_azimuth - 360,  # If TRUE, subtract 360
+                                      dat_minute$sunPos_azimuth)
   
   mySunlightTimes <- getSunlightTimes(date = as.Date(dat_minute$time_minute),
                                       lat = unique(dat_minute$lat),
@@ -92,9 +102,18 @@ format_CPOD <- function(CPOD.data){
                                                   type=unique(dat_hour$type),
                                                   lon=unique(dat_hour$lon)))
   
-  dat_hour$time_hour <- as.POSIXct(dat_hour$time_hour_num,tz='UTC')
+  dat_hour$time_hour <- as.POSIXct(dat_hour$time_hour_num, tz='UTC')
   #dat_hour$time_hour <- as.POSIXct(dat_hour$time_hour_num,origin = "1970-01-01",tz='UTC')
 
+  # Putting in the sun position!!!!
+  mySunPosition <- getSunlightPosition(date = dat_hour$time_hour,
+                                       lat = unique(dat_hour$lat),
+                                       lon = unique(dat_hour$lon))
+  dat_hour$sunPos_altitude <- mySunPosition$altitude * (180 / pi)
+  dat_hour$sunPos_azimuth <- mySunPosition$azimuth * (180 / pi) + 180
+  dat_hour$sunPos_azimuth <- ifelse(dat_hour$sunPos_azimuth >= 360,  # Condition
+                                      dat_hour$sunPos_azimuth - 360,  # If TRUE, subtract 360 
+                                      dat_hour$sunPos_azimuth)
   
   mySunlightTimes <- getSunlightTimes(date = as.Date(dat_hour$time_hour),
                                       lat = unique(dat_hour$lat),
@@ -161,6 +180,15 @@ format_CPOD <- function(CPOD.data){
                                                 lon=unique(dat_day$lon)))
   dat_day$time_day <- as.POSIXct(dat_day$time_day_num,origin = "1970-01-01",tz='UTC')
   
+  # Putting in the sun position!!!!
+  # mySunPosition <- getSunlightPosition(date = as.Date(dat_day$time_day),
+  #                                      lat = unique(dat_day$lat),
+  #                                      lon = unique(dat_day$lon))
+  # dat_day$sunPos_altitude <- mySunPosition$altitude * (180 / pi)
+  # dat_day$sunPos_azimuth <- mySunPosition$azimuth * (180 / pi) + 180
+  # dat_day$sunPos_azimuth <- ifelse(dat_day$sunPos_azimuth >= 360,  # Condition
+  #                                   dat_day$sunPos_azimuth - 360,  # If TRUE, subtract 360 
+  #                                   dat_day$sunPos_azimuth)
   
   mySunlightTimes <- getSunlightTimes(date = as.Date(dat_day$time_day),
                                       lat = unique(dat_day$lat),

@@ -146,10 +146,12 @@ p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(
   coord_cartesian(ylim = c(-0.2, 4)) +
   labs(x = "Sun altitude around Sunrise (degrees)", y = "Mean log<sub>10</sub>(SA)") +
   scale_fill_manual(values = c("Morning" = "coral", "Dawn" = "lightblue")) +
-  theme_classic() +
+  # facet_grid(rows = "type") +
+  theme_minimal() +
   theme(
     legend.position = "none",
-    axis.title.y = element_markdown()
+    axis.title.y = element_markdown(),
+    # strip.text.y = element_blank()
     )
 
 # Plotting the 3 and the 4 phases
@@ -169,20 +171,24 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(Sunny, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
   scale_fill_manual(values = c("Evening" = "coral", "Night" = "lightblue")) +
-  theme_classic() +
+  # facet_grid(rows = "type") +
+  theme_minimal() +
   theme(
     legend.position="none",
     axis.text.y = element_blank(),
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank(),    
-    axis.line.y = element_blank())
+    axis.line.y = element_blank(),
+    plot.margin=unit(c(5.5, 5.5, 5.5, -15), "pt")
+    )
 
 
 plot <- grid.arrange(p1, p2, nrow = 1)
 
-ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient.png'), plot = plot, width = 15, height = 10)
+# Commented out so that I do not accidentally enable it
+# ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient.png'), plot = plot, width = 15, height = 10)
 
-
+# Controling the numbers
 effe_tellen <- Sunny %>%
   count(altitude_bin) %>% 
   arrange(n)
