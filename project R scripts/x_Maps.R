@@ -205,15 +205,22 @@ q <- Correct_dates %>%
 str(q)
 # view(q)
 
-ggplot(q, aes(y = as.factor(station))) + 
-  geom_segment(aes(x = date_start, xend = date_end, y = station, yend = station), color = "blue", size = 1.5) +
-  geom_point(aes(x = date_start, y = station), color = "green", size = 3) +  # Mark the start date
-  geom_point(aes(x = date_end, y = station), color = "red", size = 3) +      # Mark the end date
-  labs(title = "Measurement Timeline for Each ID",
+deploy1 <-
+  ggplot(q, aes(y = as.factor(station))) + 
+  geom_segment(aes(x = date_start, xend = date_end, y = station, yend = station), color = "blue", size = 4) +
+  geom_point(aes(x = date_start, y = station), color = "green", size = 6) +  # Mark the start date
+  geom_point(aes(x = date_end, y = station), color = "red", size = 6) +      # Mark the end date
+  labs(title = "Measurement timeline for each station",
        x = "Date", 
-       y = "ID") +
+       y = "Stations") +
   scale_x_date(date_breaks = "1 month", date_labels = "%b %Y") +
   theme_minimal() +
-  theme(axis.text.y = element_text(size = 12), axis.text.x = element_text(angle = 45, hjust = 1))
+  theme(
+    axis.text.y = element_text(size = 20, color = "black"), 
+    axis.text.x = element_text(size = 20, color = "black", angle = 45, hjust = 1),
+    axis.title = element_text(size = 30),
+    title = element_text(size = 30))
 
+
+ggsave(filename = file.path(figurePath, "deploy periods.png"), plot = deploy1, width = 15, height = 10)
 

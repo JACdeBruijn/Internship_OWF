@@ -133,7 +133,7 @@ gradient_matrix_evening <- matrix(gradient_colors_evening, nrow = 1, ncol = 100)
 vertical_gradient_evening <- rasterGrob(image = gradient_matrix_evening, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
 
 # Plotting the first 2 phases 
-p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = log10(SA), fill = phase_sun)) +
+p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
   annotation_custom(vertical_gradient_morning, 
                     xmin = 4.45, xmax = 6.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -145,7 +145,7 @@ p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(
   geom_boxplot(outlier.shape = NA) +
   coord_cartesian(ylim = c(-0.2, 4)) +
   labs(x = "Sun altitude around Sunrise (degrees)", y = "Mean log<sub>10</sub>(SA)") +
-  scale_fill_manual(values = c("Morning" = "coral", "Dawn" = "lightblue")) +
+  scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
   # facet_grid(rows = "type") +
   theme_minimal() +
   theme(
@@ -155,7 +155,7 @@ p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(
     )
 
 # Plotting the 3 and the 4 phases
-p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = log10(SA), fill = phase_sun)) +
+p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
   annotation_custom(vertical_gradient_evening, 
                     xmin = 7.5, xmax = 9.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -170,7 +170,7 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
     name = "Sun altitude around Sunset (degrees)",
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(Sunny, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
-  scale_fill_manual(values = c("Evening" = "coral", "Night" = "lightblue")) +
+  scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
   # facet_grid(rows = "type") +
   theme_minimal() +
   theme(
@@ -186,7 +186,7 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
 plot <- grid.arrange(p1, p2, nrow = 1)
 
 # Commented out so that I do not accidentally enable it
-# ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient.png'), plot = plot, width = 15, height = 10)
+ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient_3.png'), plot = plot, width = 15, height = 10)
 
 # Controling the numbers
 effe_tellen <- Sunny %>%

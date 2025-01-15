@@ -478,3 +478,68 @@ plot_intervals_gap(WBAT_2021_BE_P1_belwind_70khz_60freq, gap_interval = 10, freq
 
 
 
+
+
+
+
+
+#### Code dump from the time that I thought WBAT data had ZEROs in them (14/01/25)
+# But in reality the n >= 8 filter was kicking my but!!
+# However I managed to reduce the comp time by taking out the tresholds that I dont need!
+
+ggplot(subset(WBAT_modeling, 
+              datetime > as.POSIXct("2021-07-14 10:05:29", tz = "UTC") &
+                datetime < as.POSIXct("2021-08-20 10:05:29", tz = "UTC") &
+                stationSet %in% c("2021-BE_birkenfels")), 
+       aes(x = datetime, y = SA)) +
+  geom_point() +
+  # scale_x_datetime(
+  #   breaks = seq(from = as.POSIXct("2021-07-14 10:00:00", tz = "UTC"), 
+  #                to = as.POSIXct("2021-07-15 10:00:00", tz = "UTC"), 
+  #                by = "hour"),
+  # labels = scales::date_format("%H")) +
+  theme_minimal()
+
+WBAT_testing <- WBAT_modeling %>% 
+  filter(stationSet %in% c("2021-BE_birkenfels"))
+
+WBAT_testing <- WBAT_testing %>% 
+  mutate(datetime = ymd_hms(datetime))  # Use ymd_hms to parse the datetime
+
+# Define the start and end datetime for your sequence
+start_datetime <- min(WBAT_testing$datetime)  # Use the earliest datetime in your data
+end_datetime <- max(WBAT_testing$datetime)    # Use the latest datetime in your data
+
+# Create a complete sequence of datetime values (every hour)
+complete_datetime <- tibble(
+  datetime = seq(from = start_datetime, to = end_datetime, by = "hour"))
+
+# Merge the complete datetime sequence with your existing data
+full_data <- complete_datetime %>%
+  full_join(WBAT_testing, by = "datetime") %>%  # Use full_join to include all datetimes
+  mutate(SA = if_else(is.na(SA), 0, SA))
+
+ggplot(subset(full_data, 
+              datetime > as.POSIXct("2021-07-13 10:05:29", tz = "UTC") &
+                datetime < as.POSIXct("2021-07-14 10:05:29", tz = "UTC") &
+                stationSet %in% c("2021-BE_birkenfels")), 
+       aes(x = datetime, y = SA)) +
+  geom_point() +
+  scale_x_datetime(
+    breaks = seq(from = as.POSIXct("2021-07-13 10:00:00", tz = "UTC"), 
+                 to = as.POSIXct("2021-07-14 10:00:00", tz = "UTC"), 
+                 by = "hour"),
+    labels = scales::date_format("%H")) +
+  theme_minimal()
+
+# Plotting SA normal
+ggplot(full_data, aes(x = (SA))) + geom_histogram()
+
+# Plotting SA in the log 
+ggplot(full_data, aes(x = log10(SA))) + geom_histogram()
+
+hist(full_data$SA)
+
+
+
+

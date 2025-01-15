@@ -81,10 +81,11 @@ if(processFlag){
           load(file.path(dataPath,paste0('WBAT_',idxDataSet,'.RData')))
         }
         
-        WBAT.all <- WBAT.all[!is.na(WBAT.all$datetime),]
+        # WBAT.all <- WBAT.all[!is.na(WBAT.all$datetime),]      # Here I manage to get all the datetimes, so also the ones that nothing was measured
         WBAT.all$stationSet  <- paste0(WBAT.all$dataSet,'_',WBAT.all$station,'_',WBAT.all$phase)
         WBAT.all$IDinter <- NA
-        WBAT.all <- subset(WBAT.all,depth != 0 & SA != 0)
+        WBAT.all <- subset(WBAT.all, depth != 0 & SA != 0 & !(treshold >= -59 & treshold <= -51))                          
+        # This is a biggie - I just rip out all thresholds and only keep thresholds 50 and 60 which should reduce computational time
         
         # break into intervals
         for(idxTreshold in unique(WBAT.all$treshold)){
