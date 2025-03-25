@@ -130,6 +130,10 @@ WBAT_overview_sum <- WBAT_overview %>%
             
 quantile(log10(WBAT_overview$SA))[3]
         
+# Testing the simple 
+# wilcox.test(SA ~ type, data = WBAT_overview, exact = FALSE)
+# model <- lmer(log10(SA) ~ type + (1 | stationSet), data = WBAT_overview)
+# summary(model)
 
 WBAT_overview_sum <- WBAT_overview_sum %>% 
   group_by(pairingName, frequency) %>%
@@ -236,30 +240,34 @@ WBAT_manual_shapes <- c(1, 13, 15, 23, 28, 22)[seq_len(6)]
 ################################################################################ Testing
 test <- ggplot(subset(WBAT_overview_sum, frequency == 70), aes(x = type, y = mean_SA)) +
   geom_line(aes(group = pairingName, color = line_color), 
-            linewidth = 1.25, lineend = "round",
+            linewidth = 3, lineend = "round",
             show.legend = F) +
   scale_color_manual(values = all_colors) +
   geom_star(aes(starshape = pairingName), 
             color = "black", 
             fill = NA,
-            starstroke = 1,
-            size = 6) +
+            starstroke = 1.5,
+            size = 8) +
   scale_starshape_manual(values = WBAT_manual_shapes,
-                         name = "Period & Location per pair") +
+                         name = "Pairings - Period & Location") +
   coord_cartesian(ylim = c(0, 4)) +
   # scale_y_log10() +
-  labs(x = "Type", y = "Mean log<sub>10</sub>(SA)") +
+  labs(x = "Location type", y = "Area Backscattering Coefficient log<sub>10</sub>(s<sub>a</sub>)") +
   theme_minimal() +
   theme(
-    axis.title.x = element_text(size = 30),
+    # axis.title.x = element_text(size = 25),
+    axis.title.x = element_blank(),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
-    legend.position = "inside",
-    legend.position.inside = c(0.5, .8),
-    legend.background = element_rect(fill = "white", size = .5),
-    legend.margin = margin(3, 3, 3, 3),
-    legend.key.size = unit(30, "pt")
+    legend.position = "none",
+    # legend.position.inside = c(0.5, .75),
+    # legend.background = element_rect(fill = NA, size = .5),
+    # legend.margin = margin(2, 2, 2, 3),
+    # legend.key.size = unit(40, "pt"),
+    # legend.text = element_text(size = 15),
+    # legend.title = element_text(size = 18),
+    # legend.spacing.y = unit(.1, "cm")
   )
 
 data_list <- split(subset(WBAT_overview, frequency == 70), subset(WBAT_overview, frequency == 70)$type)
@@ -321,9 +329,18 @@ for (type in names(data_list)) {
 print(test)
 
 # Saving the plot
-ggsave(filename = file.path(figurePath, 'UPDATED2 with 2024-BE - WBAT overall pairwise comparsion - 70kHz.png'), plot = test, width = 15, height = 10)
+ggsave(filename = file.path(figurePath, 'UPDATED3 with 2024-BE - WBAT overall pairwise comparsion - 70kHz.png'), plot = test, width = 14, height = 10)
 
-################################################################################
+lay_overview <- rbind(c(1),
+                      c(2))
+
+WBAT_CPOD_grid <- grid.arrange(test, C4,
+                               widths = c(1),
+                               layout_matrix = lay_overview)
+
+ggsave(filename = file.path(figurePath, 'testing the grid function to merge WBAT and CPOD.png'), plot = WBAT_CPOD_grid, width = 14, height = 16)
+
+###############################################################################
 # Working on WBAT_season showing SA over the seasons ----
 ################################################################################
 # Sub-setting on threshold -50 & mutating season
@@ -487,25 +504,25 @@ p1_weeknum <- ggplot(subset(WBAT_weeknumber, frequency == 70), aes(x = as.factor
   annotate("rect", 
            xmin = .5, xmax = 7.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#92c84c", alpha = .3) +
+           fill = "#92c84c", alpha = .2) +
   annotate("rect", 
-           xmin = 7.5, xmax = 19.5, 
+           xmin = 7.5, xmax = 20.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#f47155", alpha = .3) +
+           fill = "#f47155", alpha = .2) +
   annotate("rect", 
-           xmin = 19.5, xmax = 30.5, 
+           xmin = 20.5, xmax = 30.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#f7b354", alpha = .3) +
+           fill = "#f7b354", alpha = .2) +
   geom_boxplot(outlier.shape = NA) +
   scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
   coord_cartesian(ylim = c(0, 3.5)) +
-  labs(y = "Mean log<sub>10</sub>(SA)") +
+  labs(y = "log<sub>10</sub>(s<sub>a</sub>)") +
   scale_x_discrete(limits = factor(sort(unique(WBAT_weeknumber$week_num)))) +
   theme_pubclean() +
   theme(
     axis.title.x = element_blank(),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "none"
     )
@@ -521,12 +538,12 @@ p2_weeknum <-
   geom_bar(stat = "identity", position = "dodge", width = .8) +
   scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
   # geom_text(aes(label = unique_station_sets), vjust = .2, size = 4) +
-  labs(x = "Week Number", y = "Number of Unique Station Sets") +
+  labs(x = "Week Number", y = "Number of station") +
   theme_pubclean() +
   theme(
-    axis.title.x = element_markdown(size = 30),
+    axis.title.x = element_markdown(size = 25),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "none"
   )
@@ -537,8 +554,15 @@ lay <- rbind(c(1),
 
 plot <- grid.arrange(p1_weeknum, p2_weeknum, layout_matrix = lay)
 
-ggsave(filename = file.path(figurePath, "WBAT weeknummber3 - grouped on Type - 70khz.png"), plot = plot, width = 15, height = 10)
+ggsave(filename = file.path(figurePath, "WBAT weeknummber3 - grouped on Type - 70khz_draft.png"), plot = plot, width = 14, height = 10)
 
+
+
+lay_week_number_combined <- rbind(c(1),
+                                  c(2))
+
+plot_week_number_combined <- grid.arrange(plot, CPOD_weeknum, layout_matrix = lay_week_number_combined)
+ggsave(filename = file.path(figurePath, "Combining the CPOD and WBAT weeknumber plots.png"), plot = plot_week_number_combined, width = 14, height = 16)
 
 
 ################################################################################
@@ -714,7 +738,16 @@ station_summary <- current %>%
 
 
 
+################################################################################-
+# Visualizing the sampling dates for Jeroen ----
 
+CPOD_all_min
+
+WBAT_overview_summary <- WBAT_overview %>%
+  group_by(stationSet) %>%
+  summarise(
+    first_sampling = min(datetime),
+    last_sampling = max(datetime))
 
 
 

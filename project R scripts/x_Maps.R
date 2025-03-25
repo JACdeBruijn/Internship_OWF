@@ -135,7 +135,8 @@ ggplot() +
   # geom_sf(data = Shapefile_netherlands, fill = "lightblue", color = "black") +
   geom_sf(data = Cropped_OWF_shp, aes(), size = 2) +
   geom_sf(data = cropped_sf_turbine.BE, aes(color = "red"), size = 1) +
-  geom_sf(data = cropped_sf_turbine.NL, aes(color = "blue"), size = 1)
+  geom_sf(data = cropped_sf_turbine.NL, aes(color = "blue"), size = 1) +
+  geom_sf(data = sf_data_ETN, aes(color = "ETN"), size = 5)
 
 
 sf_turbine.BE <- turbine.BE

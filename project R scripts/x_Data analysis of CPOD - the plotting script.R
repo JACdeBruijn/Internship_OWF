@@ -2,7 +2,7 @@
 # Script for plotting CPOD data ----
 if(!require(pacman)) install.packages("pacman")
 pacman::p_load(tidyverse, lubridate, RColorBrewer, icesTAF, see, suncalc, gridExtra,
-               grid, RColorBrewer, ggtext, egg, ggpubr)
+               grid, RColorBrewer, ggtext, egg, ggpubr, ggstar, nlme)
 
 rm(list=ls())
 
@@ -196,7 +196,7 @@ CPOD_all_hour_prop <- CPOD_all_hour %>%
   summarize(count = n()) %>%
   mutate(proportion = count / sum(count))
 
-manual_shapes <- c(1, 5, 13, 15, 23, 28, 22)[seq_len(7)]
+CPOD_manual_shapes <- c(1, 5, 13, 15, 23, 28, 22)[seq_len(7)]
 line_colors <- c("#e4d49a" = "#e4d49a", "#91c1ee" = "#91c1ee")
 
 # Define the color mapping for type
@@ -205,7 +205,7 @@ pph_color_map <- c("Present.OWF" = "#ccac3d", "Absent.OWF" = "grey", "Present.Co
 # Plot the overview 
 C4 <- ggplot(CPOD_all_hour_sum, aes(x = type, y = mean_pph)) +
   geom_line(aes(group = pairingName, color = line_color), 
-            linewidth = 0.75, 
+            linewidth = 3, 
             linetype = "solid",
             lineend = "round",
             show.legend = F) +
@@ -214,23 +214,26 @@ C4 <- ggplot(CPOD_all_hour_sum, aes(x = type, y = mean_pph)) +
             color = "black", 
             fill = NA,
             starstroke = 1.5,
-            size = 6) +
-  scale_starshape_manual(values = manual_shapes,
-                         name = "Period & Location per pair") +
+            size = 8) +
+  scale_starshape_manual(values = CPOD_manual_shapes,
+                         name = "Pairings - Period & Location") +
   # scale_y_continuous(labels = scales::percent) +
   coord_cartesian(ylim = c(0, 1)) +
-  labs(x = "Type", y = "Hours with HP presence ratio") +
+  labs(x = "Location type", y = "Detection Positive Hours") +
   theme_minimal() +
   theme(
-    axis.title.x = element_text(size = 30),
+    axis.title.x = element_text(size = 25),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "inside",
-    legend.position.inside = c(0.5, .8),
-    legend.background = element_rect(fill = "white", size = .5),
-    legend.margin = margin(3, 3, 3, 3),
-    legend.key.size = unit(30, "pt")
+    legend.position.inside = c(0.5, 1),
+    legend.background = element_rect(fill = NA, size = .5),
+    legend.margin = margin(2, 2, 2, 3),
+    legend.key.size = unit(40, "pt"),
+    legend.text = element_text(size = 15),
+    legend.title = element_text(size = 18),
+    legend.spacing.y = unit(0, "cm")
   )
   
 data_list <- split(CPOD_all_hour_prop, CPOD_all_hour_prop$type)
@@ -273,10 +276,10 @@ C4 <- C4 + scale_fill_manual(values = pph_color_map)
 
 print(C4)
 
-ggsave(filename = file.path(figurePath, 'CPOD overall pairwise comparsion3.png'), plot = C4, width = 15, height = 10)
+ggsave(filename = file.path(figurePath, 'CPOD overall pairwise comparsion3_draft.png'), plot = C4, width = 14, height = 10)
 
 
-################################################################################-
+##############################################################################-
 # Making the season CPOD ----
 
 CPOD_all_hour_season <- CPOD_all_hour %>%
@@ -360,27 +363,27 @@ CPOD_all_hour_weeknumber_prop <- CPOD_all_hour_weeknumber %>%
 CPOD1_weeknum <-
   ggplot(CPOD_all_hour_weeknumber_prop, aes(x = as.factor(week_num), y = proportion, fill = type)) +
   annotate("rect", 
-           xmin = .5, xmax = 7.5, 
+           xmin = .5, xmax = 8.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#92c84c", alpha = .3) +
+           fill = "#92c84c", alpha = .2) +
   annotate("rect", 
-           xmin = 7.5, xmax = 19, 
+           xmin = 8.5, xmax = 21.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#f47155", alpha = .3) +
+           fill = "#f47155", alpha = .2) +
   annotate("rect", 
-           xmin = 19, xmax = 31.5, 
+           xmin = 21.5, xmax = 31.5, 
            ymin = -Inf, ymax = Inf, 
-           fill = "#f7b354", alpha = .3) +
+           fill = "#f7b354", alpha = .2) +
   geom_bar(stat = "identity", position = "dodge") +
   scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
   scale_x_discrete(limits = factor(sort(unique(CPOD_all_hour_weeknumber$week_num)))) +
-  labs(x = "Type", y = "Hours with HP presence") +
+  labs(x = "Location type", y = "Detection Positive Hours") +
   # geom_text(aes(label = count), vjust = .2, size = 4) +
   theme_pubclean() +
   theme(
     axis.title.x = element_blank(),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "none"
     )
@@ -399,9 +402,9 @@ CPOD2_weeknum <-
   labs(x = "Week Number", y = "Number of stations") +
   theme_pubclean() +
   theme(
-    axis.title.x = element_markdown(size = 30),
+    axis.title.x = element_markdown(size = 25),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 30),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "none"
     )
@@ -415,7 +418,7 @@ CPOD_weeknum <-
                widths = c(1),
                layout_matrix = lay)
 
-ggsave(filename = file.path(figurePath, 'CPOD weeknum.png'), plot = CPOD_weeknum, width = 15, height = 10)
+ggsave(filename = file.path(figurePath, 'CPOD weeknum_draft.png'), plot = CPOD_weeknum, width = 14, height = 10)
 
 
 
@@ -514,12 +517,12 @@ CPOD_sunny_prop <- CPOD_sunny %>%
 
 # Testing 
 
-CPOD_sunny_prop_test <- CPOD_sunny %>%
-  mutate(pph = factor(pph, levels = c("0", "1"), labels = c("Absent", "Present"))) %>% 
-  group_by(phase_sun, altitude_bin, stationSet) %>%
-  summarize(count = n()) %>%  
-  mutate(proportion = count / sum(count)) %>% 
-  view()
+# CPOD_sunny_prop_test <- CPOD_sunny %>%
+#   mutate(pph = factor(pph, levels = c("0", "1"), labels = c("Absent", "Present"))) %>% 
+#   group_by(phase_sun, altitude_bin, stationSet) %>%
+#   summarize(count = n()) %>%  
+#   mutate(proportion = count / sum(count)) %>% 
+#   view()
 
 
 
@@ -536,7 +539,7 @@ gradient_matrix_evening <- matrix(gradient_colors_evening, nrow = 1, ncol = 100)
 vertical_gradient_evening <- rasterGrob(image = gradient_matrix_evening, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
 
 # Plotting the first 2 phases 
-p1 <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = proportion, fill = type)) +
+p1_CPOD <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = proportion, fill = type)) +
   annotation_custom(vertical_gradient_morning, 
                     xmin = 4.45, xmax = 6.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -546,7 +549,7 @@ p1 <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Morning", "Dawn")), aes(x
            fill = "black") +
   geom_vline(xintercept = 6.5, linetype = "dashed") +
   geom_bar(stat = "identity", position = "dodge", width = 0.6) +
-  labs(x = "Sun altitude around Sunrise (degrees)", y = "Hours with HP presence ratio - pph") +
+  labs(x = "Sun altitude at Sunrise (deg)", y = "Detection Positive Minutes") +
   scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
   coord_cartesian(ylim = c(0, 1)) +
   # facet_grid(rows = "type") +
@@ -555,13 +558,13 @@ p1 <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Morning", "Dawn")), aes(x
     legend.position = "none",
     axis.title.x = element_blank(),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 20),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     # strip.text.y = element_blank()
   )
 
 # Plotting the 3 and the 4 phases
-p2 <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = proportion, fill = type)) +
+p2_CPOD <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = proportion, fill = type)) +
   annotation_custom(vertical_gradient_evening, 
                     xmin = 7.5, xmax = 9.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -572,7 +575,7 @@ p2 <- ggplot(subset(CPOD_sunny_prop, phase_sun %in% c("Evening", "Night")), aes(
   geom_vline(xintercept = 7.5, linetype = "dashed") +
   geom_bar(stat = "identity", position = "dodge", width = 0.6) +
   scale_x_discrete(
-    name = "Sun altitude around Sunset (degrees)",
+    name = "Sun altitude at Sunset (deg)",
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(CPOD_sunny_prop, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
   scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
@@ -598,7 +601,7 @@ station_sets_per_sunPos <- CPOD_sunny %>%
   mutate(unique_station_sets = if_else(is.na(unique_station_sets), 0L, unique_station_sets))
 
 # Create a plot to show the number of unique station sets per week_num            aes(x = as.factor(week_num), y = unique_station_sets, fill = type)) +
-p3 <-
+p3_CPOD <-
   ggplot(subset(station_sets_per_sunPos, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = unique_station_sets, fill = type)) +
   annotation_custom(vertical_gradient_morning, 
                     xmin = 4.45, xmax = 6.5, 
@@ -611,17 +614,17 @@ p3 <-
   geom_bar(stat = "identity", position = "dodge", width = .8) +
   scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
   # geom_text(aes(label = unique_station_sets), vjust = .2, size = 4) +
-  labs(x = "Sun altitude around Sunrise (degrees)", y = "Number of Unique Station Sets") +
+  labs(x = "Sun altitude at Sunrise (deg)", y = "Number of station") +
   theme_pubclean() +
   theme(
-    axis.title.x = element_markdown(size = 20),
+    axis.title.x = element_markdown(size = 25),
     axis.text.x = element_text(size = 20, color = "black"),
-    axis.title.y = element_markdown(size = 20),
+    axis.title.y = element_markdown(size = 25),
     axis.text.y = element_text(size = 20, color = "black"),
     legend.position = "none"
   )
   
-p4 <-
+p4_CPOD <-
   ggplot(subset(station_sets_per_sunPos, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = unique_station_sets, fill = type)) +
   annotation_custom(vertical_gradient_evening, 
                     xmin = 7.5, xmax = 9.5, 
@@ -633,7 +636,7 @@ p4 <-
   geom_vline(xintercept = 7.5, linetype = "dashed") +
   geom_bar(stat = "identity", position = "dodge", width = .8) +
   scale_x_discrete(
-    name = "Sun altitude around Sunset (degrees)",
+    name = "Sun altitude at Sunset (deg)",
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(station_sets_per_sunPos, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
   scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
@@ -645,41 +648,22 @@ p4 <-
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank(),    
     axis.line.y = element_blank(),
-    axis.title.x = element_text(size = 20),
+    axis.title.x = element_text(size = 25),
     axis.text.x = element_text(size = 20, color = "black"),
     plot.margin=unit(c(5.5, 5.5, 5.5, -15), "pt")
   )
 
-lay <- rbind(c(1, 2),
+lay_CPOD_sun <- rbind(c(1, 2),
              c(1, 2),
              c(3, 4))
 
-CPOD_weeknum <-
-  grid.arrange(p1, p2, p3, p4, 
-               layout_matrix = lay)
-
-
-
-
-
-
-
-
-
-
-
-plot <- grid.arrange(p1, p2, nrow = 2)
-
-
-
-
-
-
-
+CPOD_sun <-
+  grid.arrange(p1_CPOD, p2_CPOD, p3_CPOD, p4_CPOD, 
+               layout_matrix = lay_CPOD_sun)
 
 
 # Commented out so that I do not accidentally enable it
-# ggsave(filename = file.path(figurePath,'CPOD _ Sun altitude around sunset and sunrise with light gradient_better2.png'), plot = plot, width = 15, height = 10)
+ggsave(filename = file.path(figurePath,'CPOD _ Sun altitude around sunset and sunrise with light gradient_better3_draft.png'), plot = CPOD_sun, width = 14, height = 10)
 
 
 
@@ -1047,6 +1031,30 @@ CPOD_weg <- ggplot(CPOD_min, aes(x = minuut)) +
 hist(CPOD_min$minuut)
 
 ggsave(filename = file.path(figurePath, "CPOD_deterance.png"), plot = CPOD_weg, width = 15, height = 10)
+
+################################################################################-
+# Visualizing the sampling dates for Jeroen ----
+
+CPOD_all_min
+
+CPOD_all_min_summary <- CPOD_all_min %>%
+  group_by(stationSet) %>%
+  summarise(
+    first_sampling = min(time_minute),
+    last_sampling = max(time_minute))
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

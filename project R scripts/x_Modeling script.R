@@ -1,7 +1,7 @@
 ################################################################################-
 # Modeling SA - 14/01/25 ----
 if(!require(pacman)) install.packages("pacman")
-pacman::p_load(tidyverse, lubridate, mgcv)
+pacman::p_load(tidyverse, lubridate, mgcv, nlme, lattice)
 
 rm(list=ls())
 
@@ -42,14 +42,21 @@ WBAT_modeling <- WBAT.all.summary %>%
   filter(treshold %in% c("-50"),
          frequency %in% c("70"),
          n >= 8) %>% 
-  mutate(stationSet = factor(stationSet),
+  mutate(pairingName = factor(pairingName),
+         stationSet = factor(stationSet),
          type = factor(type, levels = c("control", "OWF"), label = c("Control", "OWF")),
          year = as.factor(format(datetime, format = "%y")),
          month = as.numeric(format(datetime, format = "%m")),
          week_num = as.numeric(format(datetime, format = "%W")),
+         DoY = as.numeric(format(datetime, format = "%j")),
          ToD = as.numeric(format(datetime, format = "%H")),
          log10_SA = log10(SA))
 
+WBAT_modeling_numdate <- WBAT_modeling %>% 
+  mutate(datetime = as.numeric(datetime),
+         datetime = round(datetime/3600))
+
+view(WBAT_modeling_numdate)
 # Plotting SA normal
 ggplot(WBAT_modeling, aes(x = (SA))) + geom_histogram()
 
@@ -165,15 +172,78 @@ gam_9 <- bam(log10_SA ~
              data = WBAT_modeling, method = "fREML", 
              nthreads = c(4, 1), discrete = TRUE)
 
+
+# After interaction model updates
+gam_10 <- bam(log10_SA ~ 
+                type +
+                s(week_num, k = 15) +
+                s(sunPos_altitude, k = 10) +
+                # s(DoY, pairingName, bs = "fs", k = 18) +
+                s(stationSet, bs = "re") +
+                s(year, bs = "re"),
+              data = WBAT_modeling, 
+              method = "fREML", 
+              nthreads = c(4, 1), 
+              discrete = TRUE)
+
+
+
+gam_11 <- gamm(log10_SA ~ 
+                 type +
+                 s(week_num, k = 15) +
+                 s(sunPos_altitude, k = 10) +
+                 s(pairingName, bs = "re") +
+                 s(year, bs = "re"),
+                 corAR1(form = ~ datetime | stationSet),
+               data = WBAT_modeling, 
+               method = "REML")
+
+gam_11 <- gamm(
+  log10_SA ~ 
+    type +
+    s(week_num, k = 15) +
+    s(sunPos_altitude, k = 10),
+  random = list(pairingName = ~1, year = ~1),
+  correlation = corAR1(form = ~ datetime | stationSet),
+  data = WBAT_modeling, 
+  method = "REML"
+)
+
 # Checking the model performance 
 AIC(gam_3, gam_4, gam_5, gam_6, gam_7, gam_8, gam_9)
-AIC(gam_7)
+AIC(gam_9, gam_10)
 
 # looking at the summary of the model
-summary(gam_9)
-gam.check(gam_7)
-plot(gam_9)
+summary(gam_10)
+gam.check(gam_10)
+plot(gam_10)
 
+acf(residuals(gam_10, type = "response"), main = "ACF of GAM Residuals")
+
+pacf(residuals(gam_10, type = "response"), main = "PACF - Model 0")
+
+dwtest(residuals(gam_10, type = "response") ~ 1)
+
+
+gam.check(gam_11$gam)
+plot(gam_11$gam, pages = 1)
+
+fitted <- fitted(gam_11$gam)
+plot(WBAT_modeling$log10_SA ~ fitted)
+abline(0, 1, col = "red")
+
+random <- ranef(gam_11$lme)
+plot(random)
+
+acf(residuals(gam_11$gam))
+
+acf(residuals(gam_11$lme, type = "normalized"), main = "ACF - Model 0")
+pacf(residuals(gam_11$lme, type = "normalized"), main = "PACF - Model 0")
+dwtest(residuals(gam_11$lme, type = "normalized") ~ 1)
+plot(WBAT_modeling$datetime, residuals(gam_11$lme, type = "normalized"), type = "l", main = "Residuals - Model 0", ylab = "Residuals")
+AIC(gam_11$lme)
+summary(gam_11$lme)
+summary(gam_11$gam)
 
 ################################################################################-
 # Working on the CPOD data ----
@@ -203,7 +273,8 @@ CPOD_all_hour <- CPOD.all.hour %>%
 
 # Writing it to a seperate vector; with mutating additonal things and deselecting serveral columns 
 CPOD_modeling <- CPOD_all_hour %>% 
-  mutate(stationSet = factor(stationSet),
+  mutate(pairingName = factor(pairingName),
+         stationSet = factor(stationSet),
          year = as.factor(format(time_hour, format = "%y")),
          month = as.numeric(format(time_hour, format = "%m")),
          week_num = as.numeric(format(time_hour, format = "%W")),
@@ -212,11 +283,14 @@ CPOD_modeling <- CPOD_all_hour %>%
          PODtype = "CPOD",
          PODtype = if_else(stationSet == "2024-BE_grafton", "FPOD", PODtype),
          PODtype = factor(PODtype, levels = c("CPOD", "FPOD"))) %>% 
-  select(-time_hour_num, -time_hour, -dataSet, -buzz, -inter, -other, -all_buzz, -all,
+  select(-time_hour_num, -dataSet, -buzz, -inter, -other, -all_buzz, -all,
          -all_no_buzz, -day, -hour, -month_year, -sunPos_azimuth, -hourSunset, 
          -hourSunrise, -sunset, -sunrise, -station, -freq, -date_start, -date_end,
-         -soundtrap, -CPOD, -WBAT_70, -WBAT_200, -pairing, -type.y, -pairingName)
+         -soundtrap, -CPOD, -WBAT_70, -WBAT_200, -pairing, -type.y)
 
+CPOD_modeling_num <- CPOD_modeling %>% 
+  mutate(time_hour = as.numeric(time_hour),
+         time_hour = round(time_hour/3600))
 
 # Plotting CPOD in the pph
 ggplot(CPOD_modeling, aes(x = pph)) + geom_histogram()
@@ -308,10 +382,37 @@ GPOD_6 <- bam(pph ~
               nthreads = c(4, 1), discrete = TRUE,
               family = binomial(link = "logit"))
 
-AIC(GPOD_1, GPOD_2, GPOD_3, GPOD_4, GPOD_5)
-summary(GPOD_3)
-gam.check(GPOD_3)
-plot(GPOD_3)
+# After interaction model updates
+GPOD_7 <- bam(pph ~ 
+                type +
+                s(week_num, k = 15) +
+                s(sunPos_altitude, k = 10) +
+                # s(DoY, pairingName, bs = "fs", k = 18) +
+                s(stationSet, bs = "re") +
+                s(year, bs = "re"),
+              data = CPOD_modeling, 
+              method = "fREML", 
+              nthreads = c(4, 1), 
+              discrete = TRUE,
+              family = binomial(link = "logit"))
+
+GPOD_8 <- bam(pph ~ 
+                type +
+                s(week_num, k = 15) +
+                s(sunPos_altitude, k = 10) +
+                s(time_hour, by = stationSet, k = 10) +
+                s(pairingName, bs = "re") +
+                s(year, bs = "re"),
+              data = CPOD_modeling_num, 
+              method = "fREML", 
+              nthreads = c(4, 1), 
+              discrete = TRUE,
+              family = binomial(link = "logit"))
+
+AIC(GPOD_7, GPOD_8)
+summary(GPOD_7)
+gam.check(GPOD_8)
+plot(GPOD_8)
 
 
 ################################################################################-
@@ -328,14 +429,32 @@ GPOD_pos1 <- bam(pos_minutes ~
                  nthreads = c(4, 1), discrete = TRUE,
                  family = poisson(log))
 
+GPOD_pos2 <- bam(pos_minutes ~ 
+               type +
+               s(week_num, k = 15) +
+               s(sunPos_altitude, k = 10) +
+               s(DoY, pairingName, bs = "fs", k = 18) +
+               s(stationSet, bs = "re") +
+               s(year, bs = "re"),
+             data = CPOD_modeling, 
+             method = "fREML", 
+             nthreads = c(4, 1),
+             discrete = TRUE,
+             family = poisson())
+
+gam.check(GPOD_pos2)
+summary(GPOD_pos2)
+
+AIC(GPOD_pos1, GPOD_pos2, GPOD_7)
 
 
 
-
-
-
-
-
+acf(residuals(GPOD_7, type = "response"), main = "ACF of GAM Residuals")
+acf(residuals(GPOD_pos2, type = "response"), main = "ACF of GAM Residuals")
+pacf(residuals(GPOD_7, type = "response"), main = "PACF - Model 0")
+pacf(residuals(GPOD_pos2, type = "response"), main = "PACF - Model 0")
+dwtest(residuals(GPOD_7, type = "response") ~ 1)
+dwtest(residuals(GPOD_pos2, type = "response") ~ 1)
 
 
 

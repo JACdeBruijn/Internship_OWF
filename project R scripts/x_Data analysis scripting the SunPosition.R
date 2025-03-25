@@ -133,7 +133,7 @@ gradient_matrix_evening <- matrix(gradient_colors_evening, nrow = 1, ncol = 100)
 vertical_gradient_evening <- rasterGrob(image = gradient_matrix_evening, width = unit(1, "npc"), height = unit(1, "npc"), interpolate = TRUE)
 
 # Plotting the first 2 phases 
-p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
+p1_WBAT <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
   annotation_custom(vertical_gradient_morning, 
                     xmin = 4.45, xmax = 6.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -144,18 +144,21 @@ p1 <- ggplot(subset(Sunny, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(
   geom_vline(xintercept = 6.5, linetype = "dashed") +
   geom_boxplot(outlier.shape = NA) +
   coord_cartesian(ylim = c(-0.2, 4)) +
-  labs(x = "Sun altitude around Sunrise (degrees)", y = "Mean log<sub>10</sub>(SA)") +
+  labs(x = "Sun altitude at Sunrise (deg)", y = "Mean log<sub>10</sub>(S<sub>A</sub>)") +
   scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
   # facet_grid(rows = "type") +
   theme_minimal() +
   theme(
     legend.position = "none",
-    axis.title.y = element_markdown(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 20, color = "black"),
+    axis.title.y = element_markdown(size = 25),
+    axis.text.y = element_text(size = 20, color = "black"),
     # strip.text.y = element_blank()
     )
 
 # Plotting the 3 and the 4 phases
-p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
+p2_WBAT <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = log10(SA), fill = type)) +
   annotation_custom(vertical_gradient_evening, 
                     xmin = 7.5, xmax = 9.5, 
                     ymin = -Inf, ymax = Inf) +
@@ -167,7 +170,7 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
   geom_boxplot(outlier.shape = NA) +
   coord_cartesian(ylim = c(-0.2, 4)) +
   scale_x_discrete(
-    name = "Sun altitude around Sunset (degrees)",
+    name = "Sun altitude at Sunset (deg)",
     labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
     limits = rev(levels(factor(subset(Sunny, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
   scale_fill_manual(values = c("Control" = "#388fe0", "OWF" = "#ccac3d")) +
@@ -179,14 +182,102 @@ p2 <- ggplot(subset(Sunny, phase_sun %in% c("Evening", "Night")), aes(x = factor
     axis.title.y = element_blank(),
     axis.ticks.y = element_blank(),    
     axis.line.y = element_blank(),
+    axis.title.x = element_blank(),
+    axis.text.x = element_text(size = 20, color = "black"),
     plot.margin=unit(c(5.5, 5.5, 5.5, -15), "pt")
     )
 
 
 plot <- grid.arrange(p1, p2, nrow = 1)
 
+station_sets_per_sunPos <- Sunny %>%
+  group_by(phase_sun, altitude_bin, type) %>%
+  summarise(unique_station_sets = n_distinct(stationSet, na.rm = T), .groups = "drop") %>% 
+  mutate(unique_station_sets = if_else(is.na(unique_station_sets), 0L, unique_station_sets))
+
+
+# Create a plot to show the number of unique station sets per week_num            aes(x = as.factor(week_num), y = unique_station_sets, fill = type)) +
+p3_WBAT <-
+  ggplot(subset(station_sets_per_sunPos, phase_sun %in% c("Morning", "Dawn")), aes(x = factor(altitude_bin), y = unique_station_sets, fill = type)) +
+  annotation_custom(vertical_gradient_morning, 
+                    xmin = 4.45, xmax = 6.5, 
+                    ymin = -Inf, ymax = Inf) +
+  annotate("rect", 
+           xmin = -Inf, xmax = 4.5, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "black") +
+  geom_vline(xintercept = 6.5, linetype = "dashed") +
+  geom_bar(stat = "identity", position = "dodge", width = .8) +
+  scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
+  # geom_text(aes(label = unique_station_sets), vjust = .2, size = 4) +
+  labs(x = "Sun altitude at Sunrise (deg)", y = "Number of station") +
+  theme_pubclean() +
+  theme(
+    axis.title.x = element_markdown(size = 25),
+    axis.text.x = element_text(size = 20, color = "black"),
+    axis.title.y = element_markdown(size = 25),
+    axis.text.y = element_text(size = 20, color = "black"),
+    legend.position = "none"
+  )
+
+p4_WBAT <-
+  ggplot(subset(station_sets_per_sunPos, phase_sun %in% c("Evening", "Night")), aes(x = factor(altitude_bin), y = unique_station_sets, fill = type)) +
+  annotation_custom(vertical_gradient_evening, 
+                    xmin = 7.5, xmax = 9.5, 
+                    ymin = -Inf, ymax = Inf) +
+  annotate("rect", 
+           xmin = 9.5, xmax = Inf, 
+           ymin = -Inf, ymax = Inf, 
+           fill = "black") +
+  geom_vline(xintercept = 7.5, linetype = "dashed") +
+  geom_bar(stat = "identity", position = "dodge", width = .8) +
+  scale_x_discrete(
+    name = "Sun altitude at Sunset (deg)",
+    labels = function(x) ifelse(x == "0", "Sunrise/Sunset", x),
+    limits = rev(levels(factor(subset(station_sets_per_sunPos, phase_sun %in% c("Evening", "Night"))$altitude_bin)))) +
+  scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
+  # geom_text(aes(label = unique_station_sets), vjust = .2, size = 4) +
+  theme_pubclean() +
+  theme(
+    legend.position = "none",
+    axis.text.y = element_blank(),
+    axis.title.y = element_blank(),
+    axis.ticks.y = element_blank(),    
+    axis.line.y = element_blank(),
+    axis.title.x = element_text(size = 25),
+    axis.text.x = element_text(size = 20, color = "black"),
+    plot.margin=unit(c(5.5, 5.5, 5.5, -15), "pt")
+  )
+
+lay_WBAT_sun <- rbind(c(1, 2),
+                      c(1, 2),
+                      c(3, 4))
+
+WBAT_sun <-
+  grid.arrange(p1_WBAT, p2_WBAT, p3_WBAT, p4_WBAT, 
+               layout_matrix = lay_WBAT_sun)
+
+lay_PODandWBAT_sunny <- rbind(c(1),
+                              c(2))
+
+WBAT_sun_andCPOD <-
+  grid.arrange(WBAT_sun, CPOD_sun, 
+               widths = c(1),
+               layout_matrix = lay_PODandWBAT_sunny)
+
 # Commented out so that I do not accidentally enable it
-ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient_3.png'), plot = plot, width = 15, height = 10)
+ggsave(filename = file.path(figurePath,'Combining the CPOD and WBAT for sunny.png'), plot = WBAT_sun_andCPOD, width = 14, height = 16)
+
+
+
+
+
+
+
+
+
+# Commented out so that I do not accidentally enable it
+ggsave(filename = file.path(figurePath,'Sun altitude around sunset and sunrise with light gradient_3_draft.png'), plot = WBAT_sun, width = 14, height = 10)
 
 # Controling the numbers
 effe_tellen <- Sunny %>%
