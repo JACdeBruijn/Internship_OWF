@@ -1,0 +1,511 @@
+<?xml version="1.0" encoding="UTF-8"?>
+   <gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:gml="http://www.opengis.net/gml" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd">
+         <gmd:fileIdentifier>
+               <gco:CharacterString>EMODnet_HA_Vessel_Density_Map_20240304</gco:CharacterString>
+         </gmd:fileIdentifier>
+         <gmd:language>
+               <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="eng">eng</gmd:LanguageCode>
+         </gmd:language>
+         <gmd:characterSet>
+               <gmd:MD_CharacterSetCode codeSpace="ISOTC211/19115" codeListValue="utf8" codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode">utf8</gmd:MD_CharacterSetCode>
+         </gmd:characterSet>
+         <gmd:hierarchyLevel>
+               <gmd:MD_ScopeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">dataset</gmd:MD_ScopeCode>
+         </gmd:hierarchyLevel>
+         <gmd:contact>
+               <gmd:CI_ResponsibleParty>
+                     <gmd:organisationName>
+                           <gco:CharacterString>Cogea srl</gco:CharacterString>
+                     </gmd:organisationName>
+                     <gmd:contactInfo>
+                           <gmd:CI_Contact>
+                                 <gmd:address>
+                                       <gmd:CI_Address>
+                                             <gmd:electronicMailAddress>
+                                                   <gco:CharacterString>lfalco@cogea.it</gco:CharacterString>
+                                             </gmd:electronicMailAddress>
+                                             <gmd:electronicMailAddress>
+                                                   <gco:CharacterString>apititto@cogea.it</gco:CharacterString>
+                                             </gmd:electronicMailAddress>
+                                       </gmd:CI_Address>
+                                 </gmd:address>
+                           </gmd:CI_Contact>
+                     </gmd:contactInfo>
+                     <gmd:role>
+                           <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+                     </gmd:role>
+               </gmd:CI_ResponsibleParty>
+         </gmd:contact>
+         <gmd:dateStamp>
+               <gco:Date>2024-03-04</gco:Date>
+         </gmd:dateStamp>
+         <gmd:metadataStandardName>
+               <gco:CharacterString>ISO19115</gco:CharacterString>
+         </gmd:metadataStandardName>
+         <gmd:metadataStandardVersion>
+               <gco:CharacterString>2003/Cor.1:2006</gco:CharacterString>
+         </gmd:metadataStandardVersion>
+         <gmd:referenceSystemInfo>
+               <gmd:MD_ReferenceSystem>
+                     <gmd:referenceSystemIdentifier>
+                           <gmd:RS_Identifier>
+                                 <gmd:code>
+                                       <gco:CharacterString>EPSG:3035</gco:CharacterString>
+                                 </gmd:code>
+                           </gmd:RS_Identifier>
+                     </gmd:referenceSystemIdentifier>
+               </gmd:MD_ReferenceSystem>
+         </gmd:referenceSystemInfo>
+         <gmd:referenceSystemInfo>
+               <gmd:MD_ReferenceSystem>
+                     <gmd:referenceSystemIdentifier>
+                           <gmd:RS_Identifier>
+                                 <gmd:code>
+                                       <gco:CharacterString>ISO 19108 calendar</gco:CharacterString>
+                                 </gmd:code>
+                           </gmd:RS_Identifier>
+                     </gmd:referenceSystemIdentifier>
+               </gmd:MD_ReferenceSystem>
+         </gmd:referenceSystemInfo>
+         <gmd:identificationInfo>
+               <gmd:MD_DataIdentification>
+                     <gmd:citation>
+                           <gmd:CI_Citation>
+                                 <gmd:title>
+                                       <gco:CharacterString>EMODnet Human Activities, Vessel Density Map</gco:CharacterString>
+                                 </gmd:title>
+                                 <gmd:date>
+                                       <gmd:CI_Date>
+                                             <gmd:date>
+                                                   <gco:Date>2019-03-21</gco:Date>
+                                             </gmd:date>
+                                             <gmd:dateType>
+                                                   <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                             </gmd:dateType>
+                                       </gmd:CI_Date>
+                                 </gmd:date>
+                                 <gmd:date>
+                                       <gmd:CI_Date>
+                                             <gmd:date>
+                                                   <gco:Date>2024-03-04</gco:Date>
+                                             </gmd:date>
+                                             <gmd:dateType>
+                                                   <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+                                             </gmd:dateType>
+                                       </gmd:CI_Date>
+                                 </gmd:date>
+                                 <gmd:date>
+                                       <gmd:CI_Date>
+                                             <gmd:date>
+                                                   <gco:Date>2019-03-11</gco:Date>
+                                             </gmd:date>
+                                             <gmd:dateType>
+                                                   <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+                                             </gmd:dateType>
+                                       </gmd:CI_Date>
+                                 </gmd:date>
+                                 <gmd:identifier>
+                                       <gmd:RS_Identifier>
+                                             <gmd:code>
+                                                   <gco:CharacterString>EMODnet_HA_Vessel_Density_Map_20240304</gco:CharacterString>
+                                             </gmd:code>
+                                       </gmd:RS_Identifier>
+                                 </gmd:identifier>
+                           </gmd:CI_Citation>
+                     </gmd:citation>
+                     <gmd:abstract>
+                           <gco:CharacterString> The Vessel Density maps in the EU are created since the 2019 by Cogea for the European Marine Observation and Data Network (EMODnet). The dataset is updated every year and is available for viewing and download on EMODnet web portal (Human Activities, https://emodnet.ec.europa.eu/en/human-activities). The maps are based on AIS data yearly purchased from Collecte Localisation Satellites (CLS) and ORBCOMM. The maps, GeoTIFF format, show shipping density in 1x1km cells of a grid covering all EU waters and some neighbouring areas. Density is expressed as hours per square kilometre per month. The following ship types are available:0 Other, 1 Fishing, 2 Service, 3 Dredging or underwater ops, 4 Sailing, 5 Pleasure Craft, 6 High speed craft, 7 Tug and towing, 8 Passenger, 9 Cargo, 10 Tanker, 11 Military and Law Enforcement, 12 Unknown and All ship types. Data are available by month of year. Yearly averages are also available.</gco:CharacterString>
+                     </gmd:abstract>
+                     <gmd:pointOfContact>
+                           <gmd:CI_ResponsibleParty>
+                                 <gmd:organisationName>
+                                       <gco:CharacterString>Cogea srl</gco:CharacterString>
+                                 </gmd:organisationName>
+                                 <gmd:contactInfo>
+                                       <gmd:CI_Contact>
+                                             <gmd:address>
+                                                   <gmd:CI_Address>
+                                                         <gmd:electronicMailAddress>
+                                                               <gco:CharacterString>lfalco@cogea.it</gco:CharacterString>
+                                                         </gmd:electronicMailAddress>
+                                                         <gmd:electronicMailAddress>
+                                                               <gco:CharacterString>apititto@cogea.it</gco:CharacterString>
+                                                         </gmd:electronicMailAddress>
+                                                   </gmd:CI_Address>
+                                             </gmd:address>
+                                       </gmd:CI_Contact>
+                                 </gmd:contactInfo>
+                                 <gmd:role>
+                                       <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode" codeListValue="originator">originator</gmd:CI_RoleCode>
+                                 </gmd:role>
+                           </gmd:CI_ResponsibleParty>
+                     </gmd:pointOfContact>
+                     <gmd:pointOfContact>
+                           <gmd:CI_ResponsibleParty>
+                                 <gmd:organisationName>
+                                       <gco:CharacterString>Cogea srl</gco:CharacterString>
+                                 </gmd:organisationName>
+                                 <gmd:contactInfo>
+                                       <gmd:CI_Contact>
+                                             <gmd:address>
+                                                   <gmd:CI_Address>
+                                                         <gmd:electronicMailAddress>
+                                                               <gco:CharacterString>lfalco@cogea.it</gco:CharacterString>
+                                                         </gmd:electronicMailAddress>
+                                                   </gmd:CI_Address>
+                                             </gmd:address>
+                                       </gmd:CI_Contact>
+                                 </gmd:contactInfo>
+                                 <gmd:role>
+                                       <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+                                 </gmd:role>
+     </gmd:CI_ResponsibleParty>
+                     </gmd:pointOfContact>
+                     <gmd:pointOfContact>
+                           <gmd:CI_ResponsibleParty>
+                                 <gmd:organisationName>
+                                       <gco:CharacterString>Lovell Johns</gco:CharacterString>
+                                 </gmd:organisationName>
+                                 <gmd:contactInfo>
+                                       <gmd:CI_Contact>
+                                             <gmd:address>
+                                                   <gmd:CI_Address>
+                                                         <gmd:electronicMailAddress>
+                                                               <gco:CharacterString>william.adnams@lovelljohns.com</gco:CharacterString>
+                                                         </gmd:electronicMailAddress>
+                                                   </gmd:CI_Address>
+                                             </gmd:address>
+                                       </gmd:CI_Contact>
+                                 </gmd:contactInfo>
+                                 <gmd:role>
+                                       <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+                                 </gmd:role>
+                           </gmd:CI_ResponsibleParty>
+                     </gmd:pointOfContact>
+                     <gmd:pointOfContact>
+                           <gmd:CI_ResponsibleParty>
+                                 <gmd:organisationName>
+                                       <gco:CharacterString>CLS</gco:CharacterString>
+                                 </gmd:organisationName>
+                                 <gmd:contactInfo>
+                                       <gmd:CI_Contact>
+                                             <gmd:address>
+                                                   <gmd:CI_Address>
+                                                         <gmd:electronicMailAddress>
+                                                               <gco:CharacterString>pdebusschere@cls.fr</gco:CharacterString>
+                                                         </gmd:electronicMailAddress>
+                                                   </gmd:CI_Address>
+                                             </gmd:address>
+                                       </gmd:CI_Contact>
+                                 </gmd:contactInfo>
+                                 <gmd:role>
+                                       <gmd:CI_RoleCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider">resourceProvider</gmd:CI_RoleCode>
+                                 </gmd:role>
+                           </gmd:CI_ResponsibleParty>
+                     </gmd:pointOfContact>
+                     <gmd:descriptiveKeywords>
+                           <gmd:MD_Keywords>
+                                 <gmd:keyword gco:nilReason="http://linkeddata.ge.imati.cnr.it/resource/INSPIREFCRegister/MarineLayer">
+                                       <gco:CharacterString>Marine Layer</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:keyword gco:nilReason="http://linkeddata.ge.imati.cnr.it/resource/INSPIREFCRegister/MarineWaterway">
+                                       <gco:CharacterString>Marine Waterway</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:keyword gco:nilReason="http://linkeddata.ge.imati.cnr.it/resource/INSPIREFCRegister/TransportArea">
+                                       <gco:CharacterString>Transport Area</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:thesaurusName>
+                                       <gmd:CI_Citation>
+                                             <gmd:title>
+                                                   <gco:CharacterString>INSPIRE feature concept dictionary (Version: Linked Data 1.0)</gco:CharacterString>
+                                             </gmd:title>
+                                             <gmd:date>
+                                                   <gmd:CI_Date>
+                                                         <gmd:date>
+                                                               <gco:Date>2014-09-14</gco:Date>
+                                                         </gmd:date>
+                                                         <gmd:dateType>
+                                                               <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+                                                         </gmd:dateType>
+                                                   </gmd:CI_Date>
+                                             </gmd:date>
+                                       </gmd:CI_Citation>
+                                 </gmd:thesaurusName>
+                           </gmd:MD_Keywords>
+                     </gmd:descriptiveKeywords>
+                     <gmd:descriptiveKeywords>
+                           <gmd:MD_Keywords>
+                                 <gmd:keyword gco:nilReason="http://www.eionet.europa.eu/gemet/concept/11294">
+                                       <gco:CharacterString>merchant shipping</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:keyword gco:nilReason="http://www.eionet.europa.eu/gemet/concept/5052">
+                                       <gco:CharacterString>maritime navigation</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:keyword gco:nilReason="http://www.eionet.europa.eu/gemet/concept/5055">
+                                       <gco:CharacterString>maritime transport</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:thesaurusName>
+                                       <gmd:CI_Citation>
+                                             <gmd:title>
+                                                   <gco:CharacterString>GEMET (version 3.1, 2012-07-20)</gco:CharacterString>
+                                             </gmd:title>
+                                             <gmd:date>
+                                                   <gmd:CI_Date>
+                                                         <gmd:date>
+                                                               <gco:Date>2014-06-08</gco:Date>
+                                                         </gmd:date>
+                                                         <gmd:dateType>
+                                                               <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision">revision</gmd:CI_DateTypeCode>
+                                                         </gmd:dateType>
+                                                   </gmd:CI_Date>
+                                             </gmd:date>
+                                       </gmd:CI_Citation>
+                                 </gmd:thesaurusName>
+                           </gmd:MD_Keywords>
+                     </gmd:descriptiveKeywords>
+                     <gmd:descriptiveKeywords>
+                           <gmd:MD_Keywords>
+                                 <gmd:keyword gco:nilReason="">
+                                       <gco:CharacterString>Transport networks</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:keyword gco:nilReason="">
+                                       <gco:CharacterString>Geographical grid systems</gco:CharacterString>
+                                 </gmd:keyword>
+                                 <gmd:thesaurusName>
+                                       <gmd:CI_Citation>
+                                             <gmd:title>
+                                                   <gco:CharacterString>GEMET - INSPIRE themes, version 1.0</gco:CharacterString>
+                                             </gmd:title>
+                                             <gmd:date>
+                                                   <gmd:CI_Date>
+                                                         <gmd:date>
+                                                               <gco:Date>2008-06-01</gco:Date>
+                                                         </gmd:date>
+                                                         <gmd:dateType>
+                                                               <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                                         </gmd:dateType>
+                                                   </gmd:CI_Date>
+                                             </gmd:date>
+                                       </gmd:CI_Citation>
+                                 </gmd:thesaurusName>
+                           </gmd:MD_Keywords>
+                     </gmd:descriptiveKeywords>
+                     <gmd:resourceConstraints>
+                           <gmd:MD_Constraints>
+                                 <gmd:useLimitation>
+                                       <gco:CharacterString>Re-use of content for commercial or non-commercial purposes is permitted free of charge, provided that the sources (both EMODnet - Human Activities, and CLS) are acknowledged. EMODnet - Human Activities accepts no responsibility or liability whatsoever for the re-use of content accessible on its website.</gco:CharacterString>
+                                 </gmd:useLimitation>
+                           </gmd:MD_Constraints>
+                     </gmd:resourceConstraints>
+                     <gmd:resourceConstraints>
+                           <gmd:MD_LegalConstraints>
+                                 <gmd:accessConstraints>
+                                       <gmd:MD_RestrictionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions">otherRestrictions</gmd:MD_RestrictionCode>
+                                 </gmd:accessConstraints>
+                                 <gmd:otherConstraints>
+                                       <gco:CharacterString>no limitation</gco:CharacterString>
+                                 </gmd:otherConstraints>
+                           </gmd:MD_LegalConstraints>
+                     </gmd:resourceConstraints>
+                     <gmd:spatialRepresentationType>
+                           <gmd:MD_SpatialRepresentationTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="grid">grid</gmd:MD_SpatialRepresentationTypeCode>
+                     </gmd:spatialRepresentationType>
+                     <gmd:spatialResolution>
+                           <gmd:MD_Resolution>
+                                 <gmd:distance>
+                                       <gco:Distance uom="metre">1000</gco:Distance>
+                                 </gmd:distance>
+                           </gmd:MD_Resolution>
+                     </gmd:spatialResolution>
+                     <gmd:language>
+                           <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="eng">eng</gmd:LanguageCode>
+                     </gmd:language>
+                     <gmd:topicCategory>
+                           <gmd:MD_TopicCategoryCode>oceans</gmd:MD_TopicCategoryCode>
+                     </gmd:topicCategory>
+                     <gmd:extent>
+                           <gmd:EX_Extent>
+                                 <gmd:geographicElement>
+                                       <gmd:EX_GeographicBoundingBox>
+                                             <gmd:westBoundLongitude>
+                                                   <gco:Decimal>-87.7064839294</gco:Decimal>
+                                             </gmd:westBoundLongitude>
+                                             <gmd:eastBoundLongitude>
+                                                   <gco:Decimal>97.6372436394</gco:Decimal>
+                                             </gmd:eastBoundLongitude>
+                                             <gmd:southBoundLatitude>
+                                                   <gco:Decimal>14.9510216104</gco:Decimal>
+                                             </gmd:southBoundLatitude>
+                                             <gmd:northBoundLatitude>
+                                                   <gco:Decimal>86.8427273746</gco:Decimal>
+                                             </gmd:northBoundLatitude>
+                                       </gmd:EX_GeographicBoundingBox>
+                                 </gmd:geographicElement>
+                                 <gmd:temporalElement>
+                                       <gmd:EX_TemporalExtent>
+                                             <gmd:extent>
+                                                   <gml:TimePeriod>
+                                                         <gml:beginPosition>2017-01-01</gml:beginPosition>
+                                                         <gml:endPosition>2018-12-31</gml:endPosition>
+                                                   </gml:TimePeriod>
+                                             </gmd:extent>
+                                       </gmd:EX_TemporalExtent>
+                                 </gmd:temporalElement>
+                           </gmd:EX_Extent>
+                     </gmd:extent>
+               </gmd:MD_DataIdentification>
+         </gmd:identificationInfo>
+         <gmd:distributionInfo>
+               <gmd:MD_Distribution>
+                     <gmd:distributionFormat>
+                           <gmd:MD_Format>
+                                 <gmd:name>
+                                       <gco:CharacterString>TIFF</gco:CharacterString>
+                                 </gmd:name>
+                                 <gmd:version>
+                                       <gco:CharacterString>6.0</gco:CharacterString>
+                                 </gmd:version>
+                           </gmd:MD_Format>
+                     </gmd:distributionFormat>
+                     <gmd:transferOptions>
+                           <gmd:MD_DigitalTransferOptions>
+                                 <gmd:transferSize>
+                                       <gco:Real>0</gco:Real>
+                                 </gmd:transferSize>
+                                 <gmd:onLine>
+                                       <gmd:CI_OnlineResource>
+                                             <gmd:linkage>
+                                                   <gmd:URL>https://emodnet.ec.europa.eu/en/human-activities</gmd:URL>
+                                             </gmd:linkage>
+                                             <gmd:name>
+                                                   <gco:CharacterString>EMODnet Human Activities</gco:CharacterString>
+                                             </gmd:name>
+                                             <gmd:description>
+                                                   <gco:CharacterString>EMODnet Human Activities aims to facilitate access to existing marine data on activities carried out in EU waters, by building a single entry point for geographic information on human uses of the ocean. The portal makes available information such as geographical position, spatial extent of a series of activities related to the sea, their temporal variation, time when data was provided, and attributes to indicate the intensity of each activity. The data are aggregated and presented so as to preserve personal privacy and commercially-sensitive information. The data also include a time interval so that historic as well as current activities can be included.</gco:CharacterString>
+                                             </gmd:description>
+                                             <gmd:function>
+                                                   <gmd:CI_OnLineFunctionCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_OnlineFunctionCode" codeListValue="download">download</gmd:CI_OnLineFunctionCode>
+                                             </gmd:function>
+                                       </gmd:CI_OnlineResource>
+                                 </gmd:onLine>
+                           </gmd:MD_DigitalTransferOptions>
+                     </gmd:transferOptions>
+               </gmd:MD_Distribution>
+         </gmd:distributionInfo>
+         <gmd:dataQualityInfo>
+               <gmd:DQ_DataQuality>
+                     <gmd:scope>
+                           <gmd:DQ_Scope>
+                                 <gmd:level>
+                                       <gmd:MD_ScopeCode codeListValue="dataset" codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#MD_ScopeCode">dataset</gmd:MD_ScopeCode>
+                                 </gmd:level>
+                           </gmd:DQ_Scope>
+                     </gmd:scope>
+                     <gmd:report>
+                           <gmd:DQ_DomainConsistency xsi:type="gmd:DQ_DomainConsistency_Type">
+                                 <gmd:result>
+                                       <gmd:DQ_ConformanceResult xsi:type="gmd:DQ_ConformanceResult_Type">
+                                             <gmd:specification>
+                                                   <gmd:CI_Citation>
+                                                         <gmd:title>
+                                                               <gco:CharacterString>COMMISSION REGULATION (EC) No 1205/2008 of 3 December 2008 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards metadata</gco:CharacterString>
+                                                         </gmd:title>
+                                                         <gmd:date>
+                                                               <gmd:CI_Date>
+                                                                     <gmd:date>
+                                                                           <gco:Date>2008-12-04</gco:Date>
+                                                                     </gmd:date>
+                                                                     <gmd:dateType>
+                                                                           <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                                                     </gmd:dateType>
+                                                               </gmd:CI_Date>
+                                                         </gmd:date>
+                                                   </gmd:CI_Citation>
+                                             </gmd:specification>
+                                             <gmd:explanation>
+                                                   <gco:CharacterString>See the referenced specification</gco:CharacterString>
+                                             </gmd:explanation>
+                                             <gmd:pass>
+                                                   <gco:Boolean>true</gco:Boolean>
+                                             </gmd:pass>
+                                       </gmd:DQ_ConformanceResult>
+                                 </gmd:result>
+                           </gmd:DQ_DomainConsistency>
+                     </gmd:report>
+                     <gmd:report>
+                           <gmd:DQ_TopologicalConsistency>
+                                 <gmd:result>
+                                       <gmd:DQ_ConformanceResult xsi:type="gmd:DQ_ConformanceResult_Type">
+                                             <gmd:specification xlink:href=""></gmd:specification>
+                                       </gmd:DQ_ConformanceResult>
+                                 </gmd:result>
+                           </gmd:DQ_TopologicalConsistency>
+                           <gmd:DQ_DomainConsistency xsi:type="gmd:DQ_DomainConsistency_Type">
+                                 <gmd:result>
+                                       <gmd:DQ_ConformanceResult xsi:type="gmd:DQ_ConformanceResult_Type">
+                                             <gmd:specification>
+                                                   <gmd:CI_Citation>
+                                                         <gmd:title>
+                                                               <gco:CharacterString>Corrigendum to INSPIRE Metadata Regulation published in the Official Journal of the European Union, L 328, page 83</gco:CharacterString>
+                                                         </gmd:title>
+                                                         <gmd:date>
+                                                               <gmd:CI_Date>
+                                                                     <gmd:date>
+                                                                           <gco:Date>2009-12-15</gco:Date>
+                                                                     </gmd:date>
+                                                                     <gmd:dateType>
+                                                                           <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                                                     </gmd:dateType>
+                                                               </gmd:CI_Date>
+                                                         </gmd:date>
+                                                   </gmd:CI_Citation>
+                                             </gmd:specification>
+                                             <gmd:explanation>
+                                                   <gco:CharacterString>See the referenced specification</gco:CharacterString>
+                                             </gmd:explanation>
+                                             <gmd:pass gco:nilReason="template"></gmd:pass>
+                                       </gmd:DQ_ConformanceResult>
+                                 </gmd:result>
+                           </gmd:DQ_DomainConsistency>
+                     </gmd:report>
+                     <gmd:report>
+                           <gmd:DQ_DomainConsistency xsi:type="gmd:DQ_DomainConsistency_Type">
+                                 <gmd:result>
+                                       <gmd:DQ_ConformanceResult xsi:type="gmd:DQ_ConformanceResult_Type">
+                                             <gmd:specification>
+                                                   <gmd:CI_Citation>
+                                                         <gmd:title>
+                                                               <gco:CharacterString>Commission Regulation (EU) No 1089/2010 of 23 November 2010 implementing Directive 2007/2/EC of the European Parliament and of the Council as regards interoperability of spatial data sets and services</gco:CharacterString>
+                                                         </gmd:title>
+                                                         <gmd:date>
+                                                               <gmd:CI_Date>
+                                                                     <gmd:date>
+                                                                           <gco:Date>2010-12-08</gco:Date>
+                                                                     </gmd:date>
+                                                                     <gmd:dateType>
+                                                                           <gmd:CI_DateTypeCode codeList="http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/resources/Codelist/ML_gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                                                                     </gmd:dateType>
+                                                               </gmd:CI_Date>
+                                                         </gmd:date>
+                                                   </gmd:CI_Citation>
+                                             </gmd:specification>
+                                             <gmd:explanation>
+                                                   <gco:CharacterString>See the referenced specification</gco:CharacterString>
+                                             </gmd:explanation>
+                                             <gmd:pass>
+                                                   <gco:Boolean>true</gco:Boolean>
+                                             </gmd:pass>
+                                       </gmd:DQ_ConformanceResult>
+                                 </gmd:result>
+                           </gmd:DQ_DomainConsistency>
+                     </gmd:report>
+                     <gmd:lineage>
+                           <gmd:LI_Lineage>
+                                 <gmd:statement>
+                                       <gco:CharacterString>AIS data are annualy purchased from two commercial providers, CLS and ORBCOMM. The data consists of messages sent by automatic tracking systems installed on board ships and received by terrestrial and satellite receivers alike. The acquired datasets currently cover a period from 2017 to 2023 for an area covering all EU waters. A partial pre-processing of the data is carried out by CLS: (i) The only AIS messages delivered are the ones relevant for assessing shipping activities (AIS messages 1, 2, 3, 18 and 19). (ii) The AIS data are down-sampled to 3 minutes (iii). Duplicate signals are removed. (iv) Wrong MMSI signals are removed. (v) Special characters and diacritics are removed. (vi) Signals with erroneous speed over ground (SOG) are removed (negative values or more than 80 knots). (vii) Signals with erroneous course over ground (COG) are removed (negative values or more than 360 degrees). (viii) A Kalman filter is applied to remove satellite noise. The Kalman filter is based on a correlated random walk fine-tuned for ship behaviour. The consistency of a new observation with the modelised position is checked compared to key performance indicators such as innovation, likelihood and speed. (ix) A footprint filter is applied to check for satellite AIS data consistency. All positions which are not compliant with the ship-satellite co-visibility are flagged as invalid. The AIS data are converted from their original format (NMEA) to CSV, and deliverd to Cogea split into 12 files, each corresponding to a month of the year. By running a series of commands from Linux shell, all remaining invalid characters are removed as well as unnecessary fields. The data are then imported into a PostgreSQL relational database (with the PostGIS extension), each month in a different table containing the following specialised data types: mmsi (numeric), locdate (date), loctime (time without time zone), lon (double precision), lat (double precision), aisshiptype (character varying). MMSI numbers are often associated to more than a ship type during a year. To cope with this issue, a unique MMSI/ship type register is created every year. In the register, MMSI with multiple ship types are associated the most recurring and known ship type by counting the number of record for each combination mmsi/ship type. The admissible ship types reported in the AIS messages are grouped into macrocategories: 0 Other, 1 Fishing, 2 Service, 3 Dredging or underwater ops, 4 Sailing, 5 Pleasure Craft, 6 High speed craft, 7 Tug and towing, 8 Passenger, 9 Cargo, 10 Tanker, 11 Military and Law Enforcement, 12 Unknown and All ship types. The subsequent steps consist of creating points representing ship positions from the AIS messages, then reconstructing ship routes (lines) from the points for every two consecutive positions of a ship, by using the MMSI number as a unique identifier of a ship. In addition, for each line the query calculates its length (in km) and its duration (in hours) and append them both as attributes to the line. If the distance between two consecutive positions of a ship is longer than 30 km or if the time interval is longer than 6 hours, no line is created. Both datasets (points and lines) are projected into the ETRS89/ETRS-LAEA coordinate reference system, used for statistical mapping at all scales, where true area representation is required (EPSG: 3035). Points and lines calculations are based on custom-made sql scripts developed by Cogea. The lines obtained are then intersected with a custom-made 1x1km grid polygon (21 million cells) created by Cogea, based on the EEA's national grids, extended to cover the whole area of interest (all EU sea basins) and imported in PostGIS. Because each line has length and duration as attributes, it is possible to calculate how much time each ship spent in a given cell over a month by intersecting line records with grid cell records. This is done through a custom-made sql script developed by Lovell Johns. Using the PostGIS Intersect tool, for each cell of the grid, the time value of each 'segment' in it is summed, thus obtaining the density value associated to that cell, stored in calculated PostGIS tables. Density is thus expressed in hours per square kilometre per month. The final step consists of creating and compressing, in QGIS and GDAL and from the PostGIS vessel density tables, the final raster datasets (GeoTIFF format). Annual average rasters by ship type are also finally calculated. For more details on vessel density calculations method and concepts see the technical report 'EU Vessel Density Map - Detailed Method' published at: https://emodnet.ec.europa.eu/en/reports?field_emodnet_lot_value[]=human_activities. Comparared with the original method, starting from the 2021 (2020 data) the calculations of ship positions (points) and ship routes (lines) were sped up by moving them from ArcGIS to PostGIS through custom-made sql scripts developed by Cogea.</gco:CharacterString>
+                                 </gmd:statement>
+                           </gmd:LI_Lineage>
+                     </gmd:lineage>
+               </gmd:DQ_DataQuality>
+         </gmd:dataQualityInfo>
+   </gmd:MD_Metadata>
