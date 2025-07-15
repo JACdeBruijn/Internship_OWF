@@ -176,16 +176,18 @@ belgium_netherlands <- countries[countries$iso_a3 %in% c("BEL", "NLD"), ]
 belgium_netherlands <- st_crop(belgium_netherlands, bbox)
 
 sf_data_GIT <- sf_data_GIT %>% 
-  mutate(type = factor(type)) +
-  mutate(pairingName = factor(pairingName, 
-                            levels = c("2021-BE_1", "2021-BE_2", "2023-BSW_1", "2023-BSW_2", "2023-BE_1", "2023-BE_2", "2024-BE_1"), 
-                            label = c("July-Aug/21 - Birk-/Belw-",
-                                      "July-Aug/21 - Graf-/Cpow-",
-                                      "May-June/23 - Bors 1/Bors 4",
-                                      "May-June/23 - Bors 2/Bors 3",
-                                      "July-Sept/23 - Gard-/Belw-",
-                                      "July-Sept/23 - Graf-/Cpow-",
-                                      "Oct-Dec/23 - Graf-/Cpow-")))
+  mutate(
+    type = factor(type),
+    pairingName = factor(pairingName, 
+                         levels = c("2021-BE_1", "2021-BE_2", "2023-BSW_1", "2023-BSW_2", "2023-BE_1", "2023-BE_2", "2024-BE_1"), 
+                         labels = c("July-Aug/21 - Birk-/Belw-",
+                                    "July-Aug/21 - Graf-/Cpow-",
+                                    "May-June/23 - Bors 1/Bors 4",
+                                    "May-June/23 - Bors 2/Bors 3",
+                                    "July-Sept/23 - Gard-/Belw-",
+                                    "July-Sept/23 - Graf-/Cpow-",
+                                    "Oct-Dec/23 - Graf-/Cpow-"))
+  )
 
 CPOD_manual_shapes <- c(1, 5, 13, 15, 23, 28, 22)[seq_len(7)]
 
