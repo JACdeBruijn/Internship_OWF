@@ -214,7 +214,7 @@ test_dis <- test %>%
          lon_meters_A = round(lon_meters_A, 3),                                                     # Round longitude difference to 2 decimal places
          total_distance_A = round(total_distance_A, 2))
 
-
+view(test_dis)
 
 
 

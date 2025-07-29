@@ -182,8 +182,8 @@ sf_data_GIT <- sf_data_GIT %>%
                          levels = c("2021-BE_1", "2021-BE_2", "2023-BSW_1", "2023-BSW_2", "2023-BE_1", "2023-BE_2", "2024-BE_1"), 
                          labels = c("July-Aug/21 - Birk-/Belw-",
                                     "July-Aug/21 - Graf-/Cpow-",
-                                    "May-June/23 - Bors 1/Bors 4",
-                                    "May-June/23 - Bors 2/Bors 3",
+                                    "May-June/23 - Shipwreck Bors 1/Bors 4",
+                                    "May-June/23 - Shipwreck Bors 2/Bors 3",
                                     "July-Sept/23 - Gard-/Belw-",
                                     "July-Sept/23 - Graf-/Cpow-",
                                     "Oct-Dec/23 - Graf-/Cpow-"))
@@ -196,7 +196,7 @@ sf_data_GIT_star <- sf_data_GIT %>%
          lat = st_coordinates(.)[, 2])
 
 # Define a function to read in raster data from the EMODnet bathymetry WCS
-getbathymetry<-function (name = "emodnet:mean", xmin = 2.2, ymin = 51.3, xmax = 3.5, ymax = 51.9){
+getbathymetry <- function (name = "emodnet:mean", xmin = 2.2, ymin = 51.3, xmax = 3.5, ymax = 51.9){
   bbox <- paste(xmin, ymin, xmax, ymax, sep = ",")
   
   con <- paste("https://ows.emodnet-bathymetry.eu/wcs?service=wcs&version=1.0.0&request=getcoverage&coverage=",
@@ -216,12 +216,14 @@ getbathymetry<-function (name = "emodnet:mean", xmin = 2.2, ymin = 51.3, xmax = 
   return(img)
 }
 
-
+bathy <- getbathymetry()
+bathy_df2 <- fortify.bathy(bathy)
+bathy_df <- as.data.frame(bathy, xy = TRUE, na.rm = FALSE)
 
 map_bathy <- ggplot() +
-  geom_raster(data = bathy, aes(x = x, y = y, fill = emodnet.mean)) +
+  geom_raster(data = bathy_df, aes(x = x, y = y, fill = emodnet.mean)) +
   # scale_fill_gradient(low = "darkblue", high = "white", name = "Depth (m)") +
-  scale_fill_gradientn(colors = blues, name = "Depth (m)", limits = c(min(bathy$emodnet.mean), 0)) +
+  scale_fill_gradientn(colors = blues, name = "Depth (m)", limits = c(min(bathy_df$emodnet.mean), 0)) +
   
   geom_sf(data = EMODnet_waterboarders, fill = NA, color = alpha("orange3", .6), linewidth = 1) +
   
@@ -241,17 +243,21 @@ map_bathy <- ggplot() +
   # scale_fill_manual(values = c("#388fe0", "#ccac3d")) +
   
   ggtitle("EMODnet Bathymetry") + xlab("Longitude") + ylab("Latitude") +
-  theme_bw() +
+  theme_minimal() +
   theme(
     plot.title = element_blank(),
-    axis.title.x = element_text(size = 15),
-    axis.text.x = element_text(size = 10, color = "black"),
-    axis.title.y = element_text(size = 15),
-    axis.text.y = element_text(size = 10, color = "black")
+    axis.title.x = element_text(size = 16),
+    axis.text.x = element_text(size = 12, color = "black"),
+    axis.title.y = element_text(size = 16),
+    axis.text.y = element_text(size = 12, color = "black"),
+    legend.key.height = unit(.8, "cm"),
+    # axis.ticks.length = unit(0.15, "cm"),
+    # panel.border = element_blank()
   )
 
+map_bathy
 
-ggsave(filename = file.path(figurePath,'Map of the bathy and stydyarea.png'), 
+ggsave(filename = file.path(figurePath,'Map of the bathy and stydyarea (BSW1 corrected).png'), 
        plot = map_bathy, width = 14, height = 10)
 
 
